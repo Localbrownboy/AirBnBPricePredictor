@@ -9,6 +9,9 @@ __pycache__/
 # Data
 data/
 
+# Visualizations 
+visualizations/
+
 # Distribution / packaging
 .Python
 build/
