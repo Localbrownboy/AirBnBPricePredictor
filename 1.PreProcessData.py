@@ -135,7 +135,7 @@ def save_data(df, file_path):
 def main():
     file_path = sys.argv[1]
     # Load the dataset
-    df = load_data('./data/listings.csv')
+    df = load_data(file_path)
 
     # Preprocess data
     df = preprocess_data(df)
