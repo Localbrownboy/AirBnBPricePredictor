@@ -32,7 +32,7 @@ def preprocess_data(df):
 
     # Process 'amenities' column
     df['amenities'] = df['amenities'].apply(json.loads)
-    df['amenity_count'] = df['amenities'].apply(len)
+    df['amenity_count'] = df['amenities'].apply(len) # Add new feature for length of array 
 
     # Convert rates to decimals
     df['host_response_rate'] = df['host_response_rate'].str.replace('%', '').astype(float) / 100
@@ -127,10 +127,6 @@ def bin_price(df):
     )
     return df
 
-def drop_unnecessary_columns(df, columns_to_drop):
-    """Drops specified columns from the DataFrame."""
-    df.drop(columns=columns_to_drop, inplace=True)
-    return df
 
 def save_data(df, file_path):
     """Saves the DataFrame to a CSV file."""
@@ -169,7 +165,7 @@ def main():
 
     # Drop unnecessary columns
     columns_to_drop = ['amenities', 'price']
-    df = drop_unnecessary_columns(df, columns_to_drop)
+    df.drop(columns=columns_to_drop , inplace=True)
 
     # Save the final processed data
     save_data(df, './data/processed_listings.csv')
