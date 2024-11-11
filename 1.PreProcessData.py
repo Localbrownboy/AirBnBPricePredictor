@@ -19,7 +19,7 @@ def preprocess_data(df):
     # Dropping irrelevant columns
     irrelevant_columns = [
         'id', 'listing_url', 'scrape_id', 'last_scraped', 'source', 'name', 'description', 'neighborhood_overview',
-        'picture_url', 'host_id', 'host_url', 'host_name', 'host_since', 'host_location', 'host_about',
+        'picture_url', 'host_url', 'host_name', 'host_since', 'host_location', 'host_about',
         'host_thumbnail_url', 'host_picture_url', 'host_has_profile_pic', 'host_verifications', 'neighbourhood',
         'neighbourhood_group_cleansed', 'bathrooms_text', 'minimum_minimum_nights', 'maximum_minimum_nights', 'minimum_maximum_nights',
         'maximum_maximum_nights', 'minimum_nights_avg_ntm', 'maximum_nights_avg_ntm', 'calendar_updated',
@@ -64,7 +64,7 @@ def impute_missing_values(df):
 
 def normalize_numerical_features(df):
     """Normalizes numerical features using StandardScaler."""
-    num_cols = df.select_dtypes(include=['float64', 'int64']).columns.difference(['price'])
+    num_cols = df.select_dtypes(include=['float64', 'int64']).columns.difference(['price',])
     scaler = StandardScaler()
     df[num_cols] = scaler.fit_transform(df[num_cols])
 
@@ -143,28 +143,37 @@ def main():
     # Impute missing values
     df = impute_missing_values(df)
 
+    # One Hot Encode amenities
+    df = encode_amenities(df)
+    columns_to_drop = ['amenities']
+    df.drop(columns=columns_to_drop , inplace=True)
+
+    label_cols = [
+        'host_response_time', 'host_is_superhost', 'host_neighbourhood', 'host_identity_verified',
+        'has_availability', 'instant_bookable', 
+    ] # more to come 
+    df = label_encode_features(df, label_cols)
+    save_data(df, './data/intermediate_listings_encoded.csv') # need to save before encoding the 3 features below
+    label_cols = ['neighbourhood_cleansed',
+        'property_type', 'room_type']  # encode the rest 
+    df = label_encode_features(df, label_cols)
+
     # Normalize numerical features
     df = normalize_numerical_features(df)
 
-    # One Hot Encode amenities
-    df = encode_amenities(df)
+
 
     # Label Encode categorical features
-    label_cols = [
-        'host_response_time', 'host_is_superhost', 'host_neighbourhood', 'host_identity_verified',
-        'has_availability', 'instant_bookable', 'neighbourhood_cleansed',
-        'property_type', 'room_type'
-    ]
-    df = label_encode_features(df, label_cols)
+
 
     # Save encoded data to CSV
-    save_data(df, './data/intermediate_listings_encoded.csv')
+    save_data(df, './data/intermediate_listings_encoded_and_scaled.csv')
 
     # Bin price into buckets
     df = bin_price(df)
 
     # Drop unnecessary columns
-    columns_to_drop = ['amenities', 'price']
+    columns_to_drop = ['price']
     df.drop(columns=columns_to_drop , inplace=True)
 
     # Save the final processed data
