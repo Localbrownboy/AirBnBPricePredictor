@@ -12,12 +12,14 @@ def load_data(file_path):
 
 # train a LOF model and return the index of outliers in dataset
 def local_outlier_factor(df):
-    model = LocalOutlierFactor(n_neighbors=200, contamination=0.05)
+    model = LocalOutlierFactor(n_neighbors=400, contamination=0.05)
     predictions = model.fit_predict(df)
     
     # model.fit_predict(df) returns either 1 (inliners) or -1 (outliers)
     df['outliers'] = predictions
     outliers = df[df['outliers'] == -1]
+
+    print(f'Detected {len(outliers)} outliers from Local Outlier Factor.')
 
     outlier_index = outliers.index
     return outlier_index
