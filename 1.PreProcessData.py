@@ -64,7 +64,7 @@ def impute_missing_values(df):
 
 def normalize_numerical_features(df):
     """Normalizes numerical features using StandardScaler."""
-    num_cols = df.select_dtypes(include=['float64', 'int64']).columns.difference(['price',])
+    num_cols = df.select_dtypes(include=['float64', 'int64']).columns.difference(['price','host_id'])
     scaler = StandardScaler()
     df[num_cols] = scaler.fit_transform(df[num_cols])
 
@@ -106,11 +106,15 @@ def encode_amenities(df, min_usage=0.05):
     return df
 
 def label_encode_features(df, label_cols):
-    """Applies Label Encoding to specified categorical features."""
+    """Applies Label Encoding to specified ordinal features."""
     for col in label_cols:
         le = LabelEncoder()
         df[col] = le.fit_transform(df[col])
     return df
+
+def one_hot_encode_features(df, label_cols):
+    """Applies One Hot Encoding to specified nominal features."""
+    return pd.get_dummies(df, columns=label_cols, dtype=int)
 
 def bin_price(df):
     """Bins the 'price' column into buckets."""
@@ -148,23 +152,22 @@ def main():
     columns_to_drop = ['amenities']
     df.drop(columns=columns_to_drop , inplace=True)
 
-    label_cols = [
-        'host_response_time', 'host_is_superhost', 'host_neighbourhood', 'host_identity_verified',
-        'has_availability', 'instant_bookable', 
-    ] # more to come 
-    df = label_encode_features(df, label_cols)
-    save_data(df, './data/intermediate_listings_encoded.csv') # need to save before encoding the 3 features below
-    label_cols = ['neighbourhood_cleansed',
-        'property_type', 'room_type']  # encode the rest 
-    df = label_encode_features(df, label_cols)
+    save_data(df, './data/intermediate_listings_encoded.csv') # used to visualize data in EDA.py
+
+    # convert amenities dtypes to object (prevent normalization)
+    amenities_columns = df.columns[df.columns.str.startswith('has_') & (df.columns != 'has_availability')]
+    df[amenities_columns] = df[amenities_columns].astype('object')
 
     # Normalize numerical features
     df = normalize_numerical_features(df)
 
+    # Label Encode host response time (ordinal)
+    df = label_encode_features(df, ['host_response_time'])
 
-
-    # Label Encode categorical features
-
+    # One Hot Encode nominal features
+    label_cols = ['host_is_superhost', 'host_neighbourhood', 'host_identity_verified', 
+                  'neighbourhood_cleansed', 'property_type', 'room_type', 'has_availability', 'instant_bookable']
+    df = one_hot_encode_features(df, label_cols)
 
     # Save encoded data to CSV
     save_data(df, './data/intermediate_listings_encoded_and_scaled.csv')

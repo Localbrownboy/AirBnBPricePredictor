@@ -70,7 +70,8 @@ def plot_review_scores_rating(df, output_image):
 
 # Function to plot top 3 amenities
 def plot_top_amenities(df, output_image, count=5):
-    amenity_counts = df.filter(like='has_').sum().sort_values(ascending=False).head(count)
+    amenity_columns = df.filter(like='has_').drop('has_availability', axis=1)
+    amenity_counts = amenity_columns.sum().sort_values(ascending=False).head(count)
     fig = px.bar(amenity_counts, x=amenity_counts.index, y=amenity_counts.values, title=f"Top {count} Most Frequent Amenities")
     fig.update_layout(xaxis_title="Amenity", yaxis_title="Count")
     fig.write_image(output_image, format='jpeg')
