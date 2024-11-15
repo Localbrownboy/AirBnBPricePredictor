@@ -27,6 +27,8 @@ def preprocess_data(df):
     ]
     df.drop(columns=irrelevant_columns, inplace=True)
 
+
+
     # Convert 'price' to float
     df['price'] = df['price'].replace('[$,]', '', regex=True).astype(float)
 
@@ -40,6 +42,7 @@ def preprocess_data(df):
 
     # Drop rows where 'price' is empty
     df.dropna(subset=['price'], inplace=True)
+    df = df[df['price'] < 1000]
 
     # Save pruned data to CSV
     df.to_csv('./data/intermediate_listings_pruned_columns.csv', index=False)
@@ -48,19 +51,36 @@ def preprocess_data(df):
 
 def impute_missing_values(df):
     """Imputes missing values for numerical and categorical columns."""
+    # Save a copy of the original DataFrame for comparison
+    original_df = df.copy()
+
+    # Identify numerical and categorical columns to impute
     num_cols = df.select_dtypes(include=['float64', 'int64']).columns.difference(['price'])
     cat_cols = df.select_dtypes(include=['object']).columns.difference(['amenities'])
 
+    # Impute numerical columns
     num_imputer = SimpleImputer(strategy='mean')
     df[num_cols] = num_imputer.fit_transform(df[num_cols])
 
+    # Impute categorical columns
     cat_imputer = SimpleImputer(strategy='most_frequent')
     df[cat_cols] = cat_imputer.fit_transform(df[cat_cols])
+
+    # Count the number of imputed values per attribute
+    num_imputed_counts = (original_df[num_cols].isnull() & ~df[num_cols].isnull()).sum()
+    cat_imputed_counts = (original_df[cat_cols].isnull() & ~df[cat_cols].isnull()).sum()
+
+    # Combine numerical and categorical counts into a single DataFrame
+    imputed_counts = pd.concat([num_imputed_counts, cat_imputed_counts], axis=0)
+    imputed_counts = imputed_counts.rename("Imputed Count")
 
     # Save imputed data to CSV
     df.to_csv('./data/intermediate_listings_imputed.csv', index=False)
 
-    return df
+    print("Number of imputed values per attribute:")
+    print(imputed_counts)
+
+    return df, imputed_counts
 
 def normalize_numerical_features(df):
     """Normalizes numerical features using StandardScaler."""
@@ -145,7 +165,7 @@ def main():
     df = preprocess_data(df)
 
     # Impute missing values
-    df = impute_missing_values(df)
+    (df, impute_count) = impute_missing_values(df)
 
     # One Hot Encode amenities
     df = encode_amenities(df)
@@ -176,7 +196,7 @@ def main():
     df = bin_price(df)
 
     # Drop unnecessary columns
-    columns_to_drop = ['price']
+    columns_to_drop = ['price' , 'host_id']
     df.drop(columns=columns_to_drop , inplace=True)
 
     # Save the final processed data

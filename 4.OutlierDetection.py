@@ -50,7 +50,7 @@ def main():
     df = load_data(file_path)
 
     # remove unnecessary features before training anomaly detection models
-    df = df.drop(['host_id', 'price_bucket'], axis=1)
+    df = df.drop(['price_bucket'], axis=1)
 
     outliers = local_outlier_factor(df)
 

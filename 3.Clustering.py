@@ -78,7 +78,7 @@ def main():
     file_path = sys.argv[1]
     # Load the processed data
     df = load_processed_data(file_path)
-    df.drop(columns=['host_id', 'price_bucket'], inplace=True)
+    df.drop(columns=['price_bucket'], inplace=True)
 
     # Apply K-means clustering
     print("\nApplying K-means Clustering...")
