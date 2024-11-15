@@ -82,7 +82,7 @@ def main():
 
     # Apply K-means clustering
     print("\nApplying K-means Clustering...")
-    kmeans_labels, kmeans_model = apply_kmeans_clustering(df, n_clusters=5)
+    kmeans_labels, kmeans_model = apply_kmeans_clustering(df, n_clusters=3)
     evaluate_clustering(df, kmeans_labels)
     visualize_clusters(df, kmeans_labels)
 
@@ -96,7 +96,7 @@ def main():
 
     # Apply Hierarchical Clustering
     print("\nApplying Hierarchical Clustering...")
-    hierarchical_labels, _ = apply_hierarchical_clustering(df, n_clusters=5)
+    hierarchical_labels, _ = apply_hierarchical_clustering(df, n_clusters=3)
     evaluate_clustering(df, hierarchical_labels)
     visualize_clusters(df, hierarchical_labels)
 

@@ -107,6 +107,30 @@ def plot_relationship_with_price(df, x_column, output_image):
     fig.update_layout(xaxis_title=x_column.capitalize(), yaxis_title="Price ($)")
     fig.write_image(output_image, format='jpeg')
 
+
+def plot_price_bucket_distribution(df, output_image):
+    """
+    Plots the distribution of the price buckets, sorted numerically by the bucket ranges.
+    """
+    # Extract the lower bound of the price range for sorting
+    df['price_bucket_order'] = df['price_bucket'].str.extract(r'(\d+)', expand=False).astype(int)
+
+    # Sort the DataFrame by the lower bound
+    df = df.sort_values(by='price_bucket_order')
+
+    # Plot the histogram
+    fig = px.histogram(df, x='price_bucket', title="Distribution of Price Buckets")
+    fig.update_layout(
+        xaxis_title="Price Bucket",
+        yaxis_title="Frequency",
+        xaxis=dict(categoryorder="array", categoryarray=df['price_bucket'].unique())
+    )
+    fig.write_image(output_image, format='jpeg')
+
+    # Drop the temporary column to keep the original DataFrame intact
+    df.drop(columns=['price_bucket_order'], inplace=True, errors='ignore')
+
+
 # Main function to execute all EDA steps
 def main():
     file_path = sys.argv[1]
@@ -129,7 +153,7 @@ def main():
     plot_map(df, './visualizations/map.html')
     
     # Plot distribution for accommodates, beds, bedrooms, bathrooms
-    for feature in ['accommodates', 'beds', 'bedrooms', 'bathrooms']:
+    for feature in ['accommodates', 'beds', 'bedrooms', 'bathrooms', 'host_acceptance_rate']:
         plot_distribution(df, feature, f'./visualizations/{feature}_distribution.jpeg')
     
     # Plot review scores rating distribution
@@ -144,6 +168,9 @@ def main():
 
     # Generate the heatmap
     plot_correlation_heatmap(df, selected_attributes, './visualizations/selected_correlation_heatmap.jpeg')
+
+    plot_price_bucket_distribution(df, './visualizations/price_bucket_distribution.jpeg')
+
     
     # Plot relationships between price and other features
     for feature in ['accommodates', 'bedrooms', 'neighbourhood_cleansed', 'amenity_count', ]:

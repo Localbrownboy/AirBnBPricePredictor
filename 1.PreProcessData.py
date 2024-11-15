@@ -43,6 +43,9 @@ def preprocess_data(df):
     # Drop rows where 'price' is empty
     df.dropna(subset=['price'], inplace=True)
     df = df[df['price'] < 1000]
+    df = df[df['host_acceptance_rate'] > 0.8]
+
+
 
     # Save pruned data to CSV
     df.to_csv('./data/intermediate_listings_pruned_columns.csv', index=False)
@@ -93,7 +96,7 @@ def normalize_numerical_features(df):
 
     return df
 
-def encode_amenities(df, min_usage=0.05):
+def encode_amenities(df, min_usage=0.80):
     """
     Encodes the 'amenities' column using MultiLabelBinarizer,
     cleans column names, and removes columns used in less than min_usage percentage of the rows.
@@ -136,19 +139,35 @@ def one_hot_encode_features(df, label_cols):
     """Applies One Hot Encoding to specified nominal features."""
     return pd.get_dummies(df, columns=label_cols, dtype=int)
 
-def bin_price(df):
-    """Bins the 'price' column into buckets."""
-    price_max = df['price'].max()
-    price_bins = np.arange(0, price_max + 10, 10)
-    bin_labels = [f"{int(price_bins[i])}-{int(price_bins[i+1])}" for i in range(len(price_bins) - 1)]
+def bin_price(df, bin_size=500):
+    """
+    Bins the 'price' column into equidepth buckets, each containing approximately `bin_size` items.
+    
+    Parameters:
+    - df: DataFrame containing the 'price' column.
+    - bin_size: Number of items per bin (default is 500).
+    
+    Returns:
+    - DataFrame with an additional 'price_bucket' column for the bins.
+    """
+    # Calculate the number of bins needed
+    num_bins = len(df) // bin_size
 
-    df['price_bucket'] = pd.cut(
+    # Use qcut for equidepth binning
+    df['price_bucket'], bin_edges = pd.qcut(
         df['price'],
-        bins=price_bins,
-        labels=bin_labels,
-        include_lowest=True,
-        right=True
+        q=num_bins,
+        labels=False,  # Temporarily assign numeric bin labels
+        retbins=True,
+        duplicates='drop'
     )
+
+    # Create bin labels based on bin_edges
+    bin_labels = [f"{int(bin_edges[i])}-{int(bin_edges[i+1])}" for i in range(len(bin_edges) - 1)]
+    
+    # Map numeric bin labels to textual bin labels
+    df['price_bucket'] = df['price_bucket'].map(lambda x: bin_labels[int(x)])
+    
     return df
 
 
@@ -172,6 +191,8 @@ def main():
     columns_to_drop = ['amenities']
     df.drop(columns=columns_to_drop , inplace=True)
 
+    # Bin price into buckets
+    df = bin_price(df)
     save_data(df, './data/intermediate_listings_encoded.csv') # used to visualize data in EDA.py
 
     # convert amenities dtypes to object (prevent normalization)
@@ -192,8 +213,7 @@ def main():
     # Save encoded data to CSV
     save_data(df, './data/intermediate_listings_encoded_and_scaled.csv')
 
-    # Bin price into buckets
-    df = bin_price(df)
+
 
     # Drop unnecessary columns
     columns_to_drop = ['price' , 'host_id']
