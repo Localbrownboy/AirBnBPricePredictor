@@ -3,7 +3,7 @@ import sys
 from sklearn.neighbors import LocalOutlierFactor
 from sklearn.decomposition import PCA 
 import matplotlib.pyplot as plt
-
+import numpy as np 
 # Load data function
 def load_data(file_path):
     """Loads the dataset from the given file path."""
@@ -25,24 +25,41 @@ def local_outlier_factor(df):
     return outlier_index
 
 # visualize the dataset by scatterplot with outliers marked
-def visualize_outliers(df, outliers, model_name, output_image):
-    # reduce dimensionality to 2 for visualization
-    pca = PCA(2)
-    df = pd.DataFrame(pca.fit_transform(df))
+def visualize_outliers(df, outliers , title , filepath):
+    """
+    Visualizes the data points and outliers using PCA in a 3D scatter plot.
+    
+    Parameters:
+    - df: DataFrame or array-like object containing the data.
+    - outliers: List or array of indices for the detected outliers.
+    """
+    # Dimensionality reduction to 3 components
+    reducer = PCA(n_components=3)
+    reduced_data = reducer.fit_transform(df)
 
-    plt.figure(figsize=(10,6))
+    fig = plt.figure(figsize=(10, 8))
 
-    # plot normal points
-    plt.scatter(df[0], df[1], c='cyan', label='data points')
+    # Create 3D axis
+    axis = fig.add_subplot(111, projection='3d')
+    axis.set_xlabel('Principal Component 1')
+    axis.set_ylabel('Principal Component 2')
+    axis.set_zlabel('Principal Component 3')
 
-    # plot outliers
-    plt.scatter(df.iloc[outliers, 0], df.iloc[outliers, 1], c='red', edgecolors='black', label='outliers')
+    # Plot normal points
+    normal_points = np.setdiff1d(np.arange(len(df)), outliers)
+    axis.scatter(reduced_data[normal_points, 0], reduced_data[normal_points, 1], reduced_data[normal_points, 2],
+                 c='cyan', alpha=0.8, label='Data Points')
 
-    plt.title(f'Anomaly Detection using {model_name}')
-    plt.xlabel('PCA x')
-    plt.ylabel('PCA y')
-    plt.legend(loc="upper left", markerfirst=False, edgecolor='blue')
-    plt.savefig(output_image)
+    # Plot outliers
+    axis.scatter(reduced_data[outliers, 0], reduced_data[outliers, 1], reduced_data[outliers, 2],
+                 c='red', edgecolors='black', alpha=1.0, label='Outliers')
+
+    # Add legend
+    axis.legend(loc='upper left', edgecolor='blue')
+
+    plt.title(title)
+    plt.savefig(filepath)
+
 
 def main():
     file_path = sys.argv[1]
@@ -55,6 +72,10 @@ def main():
     outliers = local_outlier_factor(df)
 
     visualize_outliers(df, outliers, 'Local Outlier Factor', './visualizations/outliers_lof.jpeg')
+
+    df.drop(index=outliers, inplace=True)
+    df.to_csv('./data/listings_outliers_removed.csv' , index=False)
+
 
 if __name__ == "__main__":
     main()
