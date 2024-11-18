@@ -87,8 +87,9 @@ def main():
     # Load the dataset
     df = load_data(file_path)
 
-    # remove unnecessary features before training anomaly detection models
-    df = df.drop(['price_bucket'], axis=1)
+    # Store the target variable price_bucket separately
+    price_bucket = df['price_bucket']
+    df = df.drop(columns=['price_bucket'])
 
     outliers = isolation_forest(df)
     visualize_outliers(df, outliers, 'Isolation Forest', './visualizations/outliers_isolation_forest.jpeg')
@@ -101,7 +102,16 @@ def main():
     outliers = local_outlier_factor(df)
     visualize_outliers(df, outliers, 'Local Outlier Factor', './visualizations/outliers_lof.jpeg')
 
+    # Drop outliers
     df.drop(index=outliers, inplace=True)
+    price_bucket.drop(index=outliers, inplace=True)
+
+    # Add price_bucket back to df
+    df['price_bucket'] = price_bucket
+
+    # Drop the 'outliers' column
+    df.drop(columns=['outliers'], inplace=True)
+
     df.to_csv('./data/listings_outliers_removed.csv' , index=False)
 
 
