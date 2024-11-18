@@ -1,6 +1,8 @@
 import pandas as pd
 import sys
 from sklearn.neighbors import LocalOutlierFactor
+from sklearn.ensemble import IsolationForest
+from sklearn.svm import OneClassSVM
 from sklearn.decomposition import PCA 
 import matplotlib.pyplot as plt
 import numpy as np 
@@ -12,7 +14,7 @@ def load_data(file_path):
 
 # train a LOF model and return the index of outliers in dataset
 def local_outlier_factor(df):
-    model = LocalOutlierFactor(n_neighbors=400, contamination=0.05)
+    model = LocalOutlierFactor(n_neighbors=400, contamination=0.06)
     predictions = model.fit_predict(df)
     
     # model.fit_predict(df) returns either 1 (inliners) or -1 (outliers)
@@ -24,15 +26,34 @@ def local_outlier_factor(df):
     outlier_index = outliers.index
     return outlier_index
 
-# visualize the dataset by scatterplot with outliers marked
-def visualize_outliers(df, outliers , title , filepath):
-    """
-    Visualizes the data points and outliers using PCA in a 3D scatter plot.
+# train an isolation forest model and return the index of outliers in dataset
+def isolation_forest(df):
+    model = IsolationForest(n_estimators=300, contamination=0.02)
+    predictions = model.fit_predict(df)
     
-    Parameters:
-    - df: DataFrame or array-like object containing the data.
-    - outliers: List or array of indices for the detected outliers.
-    """
+    df['outliers'] = predictions
+    outliers = df[df['outliers'] == -1]
+
+    print(f'Detected {len(outliers)} outliers from Isolation Forest.')
+
+    outlier_index = outliers.index
+    return outlier_index
+
+# train an one class SVM model and return the index of outliers in dataset
+def one_class_svm(df):
+    model = OneClassSVM(nu=0.02, gamma='scale', kernel='rbf')
+    predictions = model.fit_predict(df)
+    
+    df['outliers'] = predictions
+    outliers = df[df['outliers'] == -1]
+
+    print(f'Detected {len(outliers)} outliers from One Class SVM.')
+
+    outlier_index = outliers.index
+    return outlier_index
+
+# visualize the dataset by 3d plot with outliers marked
+def visualize_outliers(df, outliers, title, filepath):
     # Dimensionality reduction to 3 components
     reducer = PCA(n_components=3)
     reduced_data = reducer.fit_transform(df)
@@ -41,9 +62,9 @@ def visualize_outliers(df, outliers , title , filepath):
 
     # Create 3D axis
     axis = fig.add_subplot(111, projection='3d')
-    axis.set_xlabel('Principal Component 1')
-    axis.set_ylabel('Principal Component 2')
-    axis.set_zlabel('Principal Component 3')
+    axis.set_xlabel('Principal Component x')
+    axis.set_ylabel('Principal Component y')
+    axis.set_zlabel('Principal Component z')
 
     # Plot normal points
     normal_points = np.setdiff1d(np.arange(len(df)), outliers)
@@ -69,8 +90,15 @@ def main():
     # remove unnecessary features before training anomaly detection models
     df = df.drop(['price_bucket'], axis=1)
 
-    outliers = local_outlier_factor(df)
+    outliers = isolation_forest(df)
+    visualize_outliers(df, outliers, 'Isolation Forest', './visualizations/outliers_isolation_forest.jpeg')
 
+    # Elliptic Envelope assumes Gaussian distribution and computationally expensive
+
+    outliers = one_class_svm(df)
+    visualize_outliers(df, outliers, 'One Class SVM', './visualizations/outliers_1class_svm.jpeg')
+
+    outliers = local_outlier_factor(df)
     visualize_outliers(df, outliers, 'Local Outlier Factor', './visualizations/outliers_lof.jpeg')
 
     df.drop(index=outliers, inplace=True)
