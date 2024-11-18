@@ -73,7 +73,11 @@ def main():
 
     visualize_outliers(df, outliers, 'Local Outlier Factor', './visualizations/outliers_lof.jpeg')
 
+    # Drop outliers
     df.drop(index=outliers, inplace=True)
+    # Drop the 'outliers' column
+    df.drop(columns=['outliers'], inplace=True)
+
     df.to_csv('./data/listings_outliers_removed.csv' , index=False)
 
 
