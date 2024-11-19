@@ -69,7 +69,7 @@ def plot_review_scores_rating(df, output_image):
     fig.update_layout(xaxis_title="Review Scores Rating", yaxis_title="Frequency")
     fig.write_image(output_image, format='jpeg')
 
-# Function to plot top 3 amenities
+# Function to plot top 5 amenities
 def plot_top_amenities(df, output_image, count=5):
     amenity_columns = df.filter(like='has_').drop('has_availability', axis=1)
     amenity_counts = amenity_columns.sum().sort_values(ascending=False).head(count)
@@ -98,6 +98,7 @@ def plot_correlation_heatmap(df, attributes, output_image):
     plt.figure(figsize=(12, 8))
     sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
     plt.title('Correlation Matrix of Selected Features')
+    plt.tight_layout()
     plt.savefig(output_image)
     plt.close()
 
@@ -169,6 +170,7 @@ def plot_top_correlations_heatmap(df, top_n, output_image):
     plt.figure(figsize=(12, 8))
     sns.heatmap(filtered_corr_matrix, annot=True, cmap='coolwarm', fmt=".2f")
     plt.title(f'Top {top_n} Correlations')
+    plt.tight_layout()
     plt.savefig(output_image)
     plt.close()
 
@@ -198,9 +200,10 @@ def plot_highest_correlations_with_price(df, target_column, top_n, output_image)
     filtered_corr_matrix = df[features_to_plot].corr()
     
     # Plot the heatmap
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(filtered_corr_matrix, annot=True, cmap='coolwarm', fmt=".2f")
+    plt.figure(figsize=(12, 10))
+    sns.heatmap(filtered_corr_matrix, annot=True, cmap='coolwarm', fmt=".2f" , annot_kws={"fontsize": 10})
     plt.title(f'Top {top_n} Features Correlated with {target_column.capitalize()}')
+    plt.tight_layout()
     plt.savefig(output_image)
     plt.close()
 
@@ -253,8 +256,6 @@ def main():
         top_n=10,
         output_image='./visualizations/top_correlations_with_price.jpeg'
 )
-
-
 
     plot_price_bucket_distribution(df, './visualizations/price_bucket_distribution.jpeg')
 
