@@ -96,6 +96,12 @@ def normalize_numerical_features(df):
 
     return df
 
+    # Clean column names
+def clean_column_name(name):
+        clean_name = name.replace(' ', '_').lower()
+        clean_name = re.sub(r'[^a-z0-9_]', '', clean_name)
+        return clean_name
+
 def encode_amenities(df, min_usage=0.80):
     """
     Encodes the 'amenities' column using MultiLabelBinarizer,
@@ -105,11 +111,6 @@ def encode_amenities(df, min_usage=0.80):
     mlb = MultiLabelBinarizer()
     amenities_encoded = mlb.fit_transform(df['amenities'])
 
-    # Clean column names
-    def clean_column_name(name):
-        clean_name = name.replace(' ', '_').lower()
-        clean_name = re.sub(r'[^a-z0-9_]', '', clean_name)
-        return clean_name
 
     amenity_cols = ['has_' + clean_column_name(amenity) for amenity in mlb.classes_]
     amenities_df = pd.DataFrame(amenities_encoded, columns=amenity_cols, index=df.index)
@@ -193,6 +194,8 @@ def main():
 
     # Bin price into buckets
     df = bin_price(df)
+    df.columns = [clean_column_name(col) for col in df.columns] 
+
     save_data(df, './data/intermediate_listings_encoded.csv') # used to visualize data in EDA.py
 
     # convert amenities dtypes to object (prevent normalization)
@@ -209,15 +212,18 @@ def main():
     label_cols = ['host_is_superhost', 'host_neighbourhood', 'host_identity_verified', 
                   'neighbourhood_cleansed', 'property_type', 'room_type', 'has_availability', 'instant_bookable']
     df = one_hot_encode_features(df, label_cols)
+    df.columns = [clean_column_name(col) for col in df.columns] 
 
     # Save encoded data to CSV
     save_data(df, './data/intermediate_listings_encoded_and_scaled.csv')
-
+    
 
 
     # Drop unnecessary columns
     columns_to_drop = ['price' , 'host_id']
     df.drop(columns=columns_to_drop , inplace=True)
+    # Clean column names
+    df.columns = [clean_column_name(col) for col in df.columns] 
 
     # Save the final processed data
     save_data(df, './data/processed_listings.csv')
