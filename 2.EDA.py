@@ -242,9 +242,7 @@ def main():
     
     # Plot top 5 amenities
     plot_top_amenities(df, './visualizations/top_amenities.jpeg')
-    
-    # Plot correlation heatmap
-    
+        
     selected_attributes = ['price', 'accommodates', 'bedrooms', 'bathrooms', 'review_scores_rating', 'amenity_count']
 
     # Generate the heatmap
@@ -255,11 +253,10 @@ def main():
         target_column='price',
         top_n=10,
         output_image='./visualizations/top_correlations_with_price.jpeg'
-)
+    )
 
     plot_price_bucket_distribution(df, './visualizations/price_bucket_distribution.jpeg')
 
-    
     # Plot relationships between price and other features
     for feature in ['accommodates', 'bedrooms', 'neighbourhood_cleansed', 'amenity_count', ]:
         plot_relationship_with_price(df, feature, f'./visualizations/price_vs_{feature}.jpeg')

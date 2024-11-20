@@ -25,7 +25,7 @@ def select_features_rfe(df: pd.DataFrame, target_col: str, num_features: int = 2
     rfe.fit(X, y)
 
     selected_features = X.columns[rfe.support_].tolist()
-    print("Selected Features using RFE:", selected_features)
+    print("\nSelected Features using RFE:", selected_features)
 
     return selected_features
 

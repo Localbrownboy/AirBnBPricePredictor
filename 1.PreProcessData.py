@@ -27,8 +27,6 @@ def preprocess_data(df):
     ]
     df.drop(columns=irrelevant_columns, inplace=True)
 
-
-
     # Convert 'price' to float
     df['price'] = df['price'].replace('[$,]', '', regex=True).astype(float)
 
@@ -44,8 +42,6 @@ def preprocess_data(df):
     df.dropna(subset=['price'], inplace=True)
     df = df[df['price'] < 1000]
     df = df[df['host_acceptance_rate'] > 0.8]
-
-
 
     # Save pruned data to CSV
     df.to_csv('./data/intermediate_listings_pruned_columns.csv', index=False)
@@ -98,9 +94,9 @@ def normalize_numerical_features(df):
 
     # Clean column names
 def clean_column_name(name):
-        clean_name = name.replace(' ', '_').lower()
-        clean_name = re.sub(r'[^a-z0-9_]', '', clean_name)
-        return clean_name
+    clean_name = name.replace(' ', '_').lower()
+    clean_name = re.sub(r'[^a-z0-9_]', '', clean_name)
+    return clean_name
 
 def encode_amenities(df, min_usage=0.80):
     """
@@ -125,7 +121,7 @@ def encode_amenities(df, min_usage=0.80):
     cols_to_drop = [col for col in has_cols if col not in cols_to_keep]
     df.drop(columns=cols_to_drop, inplace=True)
 
-    print(f"Removed {len(cols_to_drop)} 'has_' columns.")
+    print(f"\nRemoved {len(cols_to_drop)} 'has_' columns.")
 
     return df
 
