@@ -216,7 +216,7 @@ def main():
 
 
     # Drop unnecessary columns
-    columns_to_drop = ['price' , 'host_id']
+    columns_to_drop = ['host_id']
     df.drop(columns=columns_to_drop , inplace=True)
     # Clean column names
     df.columns = [clean_column_name(col) for col in df.columns] 
