@@ -88,26 +88,28 @@ def main():
     df = load_data(file_path)
 
     # Store the target variable price_bucket separately
-    price_bucket = df['price_bucket']
-    df = df.drop(columns=['price_bucket'])
+    price_buckets = df[['price_bucket_equidepth', 'price_bucket_equiwidth']]
+    df = df.drop(columns=['price_bucket_equidepth' , 'price_bucket_equiwidth'])
 
     outliers = isolation_forest(df)
     visualize_outliers(df, outliers, 'Isolation Forest', './visualizations/outliers_isolation_forest.jpeg')
 
     # Elliptic Envelope assumes Gaussian distribution and computationally expensive
 
-    outliers = one_class_svm(df)
-    visualize_outliers(df, outliers, 'One Class SVM', './visualizations/outliers_1class_svm.jpeg')
+
 
     outliers = local_outlier_factor(df)
     visualize_outliers(df, outliers, 'Local Outlier Factor', './visualizations/outliers_lof.jpeg')
 
+    outliers = one_class_svm(df) # these are the outliers we want to drop
+    visualize_outliers(df, outliers, 'One Class SVM', './visualizations/outliers_1class_svm.jpeg')
+
     # Drop outliers
     df.drop(index=outliers, inplace=True)
-    price_bucket.drop(index=outliers, inplace=True)
+    price_buckets.drop(index=outliers, inplace=True)
 
     # Add price_bucket back to df
-    df['price_bucket'] = price_bucket
+    df[['price_bucket_equidepth', 'price_bucket_equiwidth']] = price_buckets
 
     # Drop the 'outliers' column
     df.drop(columns=['outliers'], inplace=True)

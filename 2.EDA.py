@@ -110,22 +110,22 @@ def plot_relationship_with_price(df, x_column, output_image):
     fig.write_image(output_image, format='jpeg')
 
 
-def plot_price_bucket_distribution(df, output_image):
+def plot_price_bucket_distribution(df, output_image, bucket_column):
     """
     Plots the distribution of the price buckets, sorted numerically by the bucket ranges.
     """
     # Extract the lower bound of the price range for sorting
-    df['price_bucket_order'] = df['price_bucket'].str.extract(r'(\d+)', expand=False).astype(int)
+    df['price_bucket_order'] = df[bucket_column].str.extract(r'(\d+)', expand=False).astype(int)
 
     # Sort the DataFrame by the lower bound
     df = df.sort_values(by='price_bucket_order')
 
     # Plot the histogram
-    fig = px.histogram(df, x='price_bucket', title="Distribution of Price Buckets")
+    fig = px.histogram(df, x=bucket_column, title="Distribution of Price Buckets")
     fig.update_layout(
         xaxis_title="Price Bucket",
         yaxis_title="Frequency",
-        xaxis=dict(categoryorder="array", categoryarray=df['price_bucket'].unique())
+        xaxis=dict(categoryorder="array", categoryarray=df[bucket_column].unique())
     )
     fig.write_image(output_image, format='jpeg')
 
@@ -216,7 +216,7 @@ def main():
 
     # Load the dataset
     df = load_data(file_path)
-    df_scaled = load_data(file_path_scaled).drop('price_bucket' , axis=1) # drop price bucket column 
+    df_scaled = load_data(file_path_scaled).drop( ['price_bucket_equidepth' , 'price_bucket_equiwidth'] , axis=1) # drop price bucket column 
 
     # Plot price distribution
     plot_price_distribution(df, './visualizations/price_histogram.html', './visualizations/price_histogram.jpeg', x_axis_limit=2000)
@@ -251,11 +251,13 @@ def main():
     plot_highest_correlations_with_price(
         df=df_scaled,
         target_column='price',
-        top_n=10,
+        top_n=20,
         output_image='./visualizations/top_correlations_with_price.jpeg'
     )
 
-    plot_price_bucket_distribution(df, './visualizations/price_bucket_distribution.jpeg')
+    plot_price_bucket_distribution(df, './visualizations/price_bucket_equiwidth_distribution.jpeg', bucket_column='price_bucket_equiwidth')
+    plot_price_bucket_distribution(df, './visualizations/price_bucket_equidepth_distribution.jpeg', bucket_column='price_bucket_equidepth')
+
 
     # Plot relationships between price and other features
     for feature in ['accommodates', 'bedrooms', 'neighbourhood_cleansed', 'amenity_count', ]:

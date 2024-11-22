@@ -128,9 +128,9 @@ def main():
     file_path = sys.argv[1]
     # Load the processed data
     df = load_processed_data(file_path)
-    df.drop(columns=['price_bucket'], inplace=True)
+    df.drop(columns=['price_bucket_equidepth' , 'price_bucket_equiwidth'], inplace=True)
 
-    kmeans_labels, _ = apply_kmeans_clustering(df, n_clusters=4)
+    kmeans_labels, _ = apply_kmeans_clustering(df, n_clusters=2)
     visualize_clusters(df, kmeans_labels, 'KMeans Clustering', './visualizations/clustering_kmeans.jpeg')
     silhouette, calinski, davies  = evaluate_clustering(df, kmeans_labels)
     print("\nApplying Kmeans:...")
@@ -139,7 +139,7 @@ def main():
     print(f"Davies-Bouldin Index: {davies:.3f}")
 
 
-    dbscan_labels, _ = apply_dbscan_clustering(df, eps=8.5, min_samples=3)
+    dbscan_labels, _ = apply_dbscan_clustering(df, eps=9.8999, min_samples=7)
     visualize_clusters(df, dbscan_labels, 'DBSCAN Clustering', './visualizations/clustering_dbscan.jpeg')
     silhouette, calinski, davies = evaluate_clustering(df, dbscan_labels)
     print("\nApplying DBSCAN:...")
@@ -148,7 +148,7 @@ def main():
     print(f"Davies-Bouldin Index: {davies:.3f}")
 
 
-    hierarchical_labels, _ = apply_hierarchical_clustering(df, n_clusters=3)
+    hierarchical_labels, _ = apply_hierarchical_clustering(df, n_clusters=2)
     visualize_clusters(df, hierarchical_labels, 'Hierarchical Clustering', './visualizations/clustering_hierarchical.jpeg')
     silhouette, calinski, davies = evaluate_clustering(df, hierarchical_labels)
     print("\nApplying Hierarchical:...")
@@ -157,9 +157,9 @@ def main():
     print(f"Davies-Bouldin Index: {davies:.3f}")
 
 
-    # tune_kmeans(df)
-    # tune_dbscan(df)
-    # tune_hierarchical(df)
+    tune_kmeans(df)
+    tune_dbscan(df)
+    tune_hierarchical(df)
 
 
 

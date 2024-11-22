@@ -40,7 +40,7 @@ def preprocess_data(df):
 
     # Drop rows where 'price' is empty
     df.dropna(subset=['price'], inplace=True)
-    df = df[df['price'] < 1000]
+    df = df[df['price'] < 500]
     df = df[df['host_acceptance_rate'] > 0.8]
 
     # Save pruned data to CSV
@@ -136,7 +136,7 @@ def one_hot_encode_features(df, label_cols):
     """Applies One Hot Encoding to specified nominal features."""
     return pd.get_dummies(df, columns=label_cols, dtype=int)
 
-def bin_price(df, bin_size=500):
+def bin_price_equidepth(df, bin_size=500):
     """
     Bins the 'price' column into equidepth buckets, each containing approximately `bin_size` items.
     
@@ -151,7 +151,7 @@ def bin_price(df, bin_size=500):
     num_bins = len(df) // bin_size
 
     # Use qcut for equidepth binning
-    df['price_bucket'], bin_edges = pd.qcut(
+    df['price_bucket_equidepth'], bin_edges = pd.qcut(
         df['price'],
         q=num_bins,
         labels=False,  # Temporarily assign numeric bin labels
@@ -163,9 +163,47 @@ def bin_price(df, bin_size=500):
     bin_labels = [f"{int(bin_edges[i])}-{int(bin_edges[i+1])}" for i in range(len(bin_edges) - 1)]
     
     # Map numeric bin labels to textual bin labels
-    df['price_bucket'] = df['price_bucket'].map(lambda x: bin_labels[int(x)])
+    df['price_bucket_equidepth'] = df['price_bucket_equidepth'].map(lambda x: bin_labels[int(x)])
     
     return df
+
+def bin_price_equiwidth(df, bin_width):
+    """
+    Bins the 'price' column into equiwidth buckets based on a specified bin width.
+    
+    Parameters:
+    - df: DataFrame containing the 'price' column.
+    - bin_width: The width of each bin.
+    
+    Returns:
+    - DataFrame with an additional 'price_bucket_equiwidth' column for the bins.
+    """
+    # Calculate the range of the price column
+    min_price = df['price'].min()
+    max_price = df['price'].max()
+
+    # Determine the bin edges based on the bin width
+    bin_edges = np.arange(min_price, max_price + bin_width, bin_width)
+    
+    # Use cut for equiwidth binning
+    df['price_bucket_equiwidth'], bin_edges = pd.cut(
+        df['price'],
+        bins=bin_edges,
+        labels=False,  # Temporarily assign numeric bin labels
+        retbins=True,
+        include_lowest=True  # Ensure the lowest value is included
+    )
+    
+    # Create bin labels based on bin_edges
+    bin_labels = [f"{int(bin_edges[i])}-{int(bin_edges[i+1])}" for i in range(len(bin_edges) - 1)]
+    
+    # Map numeric bin labels to textual bin labels, handle NaN gracefully
+    df['price_bucket_equiwidth'] = df['price_bucket_equiwidth'].map(
+        lambda x: bin_labels[int(x)] if pd.notna(x) else "Out of range"
+    )
+    
+    return df
+
 
 
 def save_data(df, file_path):
@@ -189,7 +227,8 @@ def main():
     df.drop(columns=columns_to_drop , inplace=True)
 
     # Bin price into buckets
-    df = bin_price(df)
+    df = bin_price_equidepth(df)
+    df = bin_price_equiwidth(df , bin_width=50)
     df.columns = [clean_column_name(col) for col in df.columns] 
 
     save_data(df, './data/intermediate_listings_encoded.csv') # used to visualize data in EDA.py
