@@ -7,6 +7,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import label_binarize
 import matplotlib.pyplot as plt
+from sklearn.neighbors import KNeighborsClassifier
 
 
 def load_data(file_path):
@@ -44,7 +45,7 @@ def evaluate_model_metrics(y_test, y_pred):
     - y_test: test data of target variable
     - y_pred: prediction of target variable by model
     """
-    if y_test.name == 'price_bucket': # classification
+    if y_test.name == 'price_bucket_equiwidth': # classification
         accuracy = accuracy_score(y_test, y_pred)
         precision = precision_score(y_test, y_pred, average='weighted')
         recall = recall_score(y_test, y_pred, average='weighted')
@@ -75,10 +76,10 @@ def visualize_model_results(y_test, y_pred, model_name, y_pred_prob=None):
     - model_name: the name of the model
     - y_pred_prob: predicted probability of each class in target variable (only in categorical)
     """
-    if y_test.name == 'price_bucket': # classification
+    if y_test.name == 'price_bucket_equiwidth': # classification
 
         # Confusion Matrix
-        class_labels = ['20-105', '105-138', '138-172', '172-211', '211-260', '260-350', '350-999']
+        class_labels = sorted(np.unique(y_test), key=lambda x: int(x.split('-')[0]))
 
         cm = confusion_matrix(y_test, y_pred, labels=class_labels)
         disp = ConfusionMatrixDisplay(cm, display_labels=class_labels)
@@ -126,8 +127,8 @@ def main():
     df = load_data(file_path)
 
     # split data to features (X) and target variable (y)
-    X = df.drop(['price_bucket', 'price'], axis=1)  # Remove price_bucket (classification target) and price
-    y_classification = df['price_bucket']
+    X = df.drop(['price_bucket_equiwidth', 'price',], axis=1)  # Remove price_bucket (classification target) and price
+    y_classification = df['price_bucket_equiwidth']
     y_regression = df['price']
 
     # split the dataset into training and testing sets
@@ -142,11 +143,11 @@ def main():
     )
 
     # initialize stratified k-fold for cross validation
-    sk_fold = StratifiedKFold(n_splits=10)
+    sk_fold = StratifiedKFold(n_splits=5)
 
     # initialize classification models
     classifiers = {
-        "Random Forest Classifier": RandomForestClassifier(n_estimators=100, random_state=42),
+        "Random Forest": RandomForestClassifier(n_estimators=100, min_samples_split=2, min_samples_leaf=5, max_depth=20, bootstrap=False, random_state=42, ),
         "Neural Network Classifier": MLPClassifier(
             hidden_layer_sizes=(50,10,6),
             max_iter=300,
@@ -154,7 +155,9 @@ def main():
             early_stopping=True,       # Enable early stopping
             validation_fraction=0.2,   # Fraction of training data used for validation
             n_iter_no_change=10,         
-        )
+        ),
+        "kNN": KNeighborsClassifier(n_neighbors=16)
+
     }
 
     for name, model in classifiers.items():
