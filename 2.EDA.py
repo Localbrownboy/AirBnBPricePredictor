@@ -15,7 +15,7 @@ def load_data(file_path):
     return df
 
 # Function to plot price distribution
-def plot_price_distribution(df, output_html, output_image, x_axis_limit=2000):
+def plot_price_distribution(df, output_html, output_image, x_axis_limit=500):
     fig = px.histogram(df, x='price', title="Distribution of Price")
     fig.update_xaxes(range=[0, x_axis_limit])
     fig.update_layout(xaxis_title="Price ($)", yaxis_title="Frequency")
@@ -175,48 +175,48 @@ def main():
     df_scaled = load_data(file_path_scaled).drop( ['price_bucket_equidepth' , 'price_bucket_equiwidth'] , axis=1) # drop price bucket column 
 
     # Plot price distribution
-    plot_price_distribution(df, './visualizations/price_histogram.html', './visualizations/price_histogram.jpeg', x_axis_limit=2000)
+    plot_price_distribution(df, './visualizations/eda/price_histogram.html', './visualizations/eda/price_histogram.jpeg', x_axis_limit=2000)
     
     # Plot listing count per host
-    plot_listing_count_per_host(df, './visualizations/listing_count_per_host.jpeg')
+    plot_listing_count_per_host(df, './visualizations/eda/listing_count_per_host.jpeg')
     
     # Plot property type distribution
-    plot_property_type_distribution(df, './visualizations/property_type_distribution.jpeg')
+    plot_property_type_distribution(df, './visualizations/eda/property_type_distribution.jpeg')
     
     # Plot room type distribution
-    plot_room_type_distribution(df, './visualizations/room_type_distribution.jpeg')
+    plot_room_type_distribution(df, './visualizations/eda/room_type_distribution.jpeg')
     
     # Plot map of listings
-    plot_map(df, './visualizations/map.html')
+    plot_map(df, './visualizations/eda/map.html')
     
     # Plot distribution for accommodates, beds, bedrooms, bathrooms
     for feature in ['accommodates', 'beds', 'bedrooms', 'bathrooms', 'host_acceptance_rate']:
-        plot_distribution(df, feature, f'./visualizations/{feature}_distribution.jpeg')
+        plot_distribution(df, feature, f'./visualizations/eda/{feature}_distribution.jpeg')
     
     # Plot review scores rating distribution
-    plot_review_scores_rating(df, './visualizations/review_scores_rating_distribution.jpeg')
+    plot_review_scores_rating(df, './visualizations/eda/review_scores_rating_distribution.jpeg')
     
     # Plot top 5 amenities
-    plot_top_amenities(df, './visualizations/top_amenities.jpeg')
+    plot_top_amenities(df, './visualizations/eda/top_amenities.jpeg')
         
     selected_attributes = ['price', 'accommodates', 'bedrooms', 'bathrooms', 'review_scores_rating', 'amenity_count']
 
     # Generate the heatmap
-    plot_correlation_heatmap(df, selected_attributes, './visualizations/selected_correlation_heatmap.jpeg')
+    plot_correlation_heatmap(df, selected_attributes, './visualizations/eda/selected_correlation_heatmap.jpeg')
     plot_highest_correlations_with_price(
         df=df_scaled,
         target_column='price',
         top_n=20,
-        output_image='./visualizations/top_correlations_with_price.jpeg'
+        output_image='./visualizations/eda/top_correlations_with_price.jpeg'
     )
 
-    plot_price_bucket_distribution(df, './visualizations/price_bucket_equiwidth_distribution.jpeg', bucket_column='price_bucket_equiwidth')
-    plot_price_bucket_distribution(df, './visualizations/price_bucket_equidepth_distribution.jpeg', bucket_column='price_bucket_equidepth')
+    plot_price_bucket_distribution(df, './visualizations/eda/price_bucket_equiwidth_distribution.jpeg', bucket_column='price_bucket_equiwidth')
+    plot_price_bucket_distribution(df, './visualizations/eda/price_bucket_equidepth_distribution.jpeg', bucket_column='price_bucket_equidepth')
 
 
     # Plot relationships between price and other features
     for feature in ['accommodates', 'bedrooms', 'neighbourhood_cleansed', 'amenity_count', ]:
-        plot_relationship_with_price(df, feature, f'./visualizations/price_vs_{feature}.jpeg')
+        plot_relationship_with_price(df, feature, f'./visualizations/eda/price_vs_{feature}.jpeg')
 
 if __name__ == "__main__":
     main()

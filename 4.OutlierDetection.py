@@ -92,17 +92,17 @@ def main():
     df = df.drop(columns=['price_bucket_equidepth' , 'price_bucket_equiwidth'])
 
     outliers = isolation_forest(df)
-    visualize_outliers(df, outliers, 'Isolation Forest', './visualizations/outliers_isolation_forest.jpeg')
+    visualize_outliers(df, outliers, 'Isolation Forest', './visualizations/outliers/outliers_isolation_forest.jpeg')
 
     # Elliptic Envelope assumes Gaussian distribution and computationally expensive
 
 
 
     outliers = local_outlier_factor(df)
-    visualize_outliers(df, outliers, 'Local Outlier Factor', './visualizations/outliers_lof.jpeg')
+    visualize_outliers(df, outliers, 'Local Outlier Factor', './visualizations/outliers/outliers_lof.jpeg')
 
     outliers = one_class_svm(df) # these are the outliers we want to drop
-    visualize_outliers(df, outliers, 'One Class SVM', './visualizations/outliers_1class_svm.jpeg')
+    visualize_outliers(df, outliers, 'One Class SVM', './visualizations/outliers/outliers_1class_svm.jpeg')
 
     # Drop outliers
     df.drop(index=outliers, inplace=True)
