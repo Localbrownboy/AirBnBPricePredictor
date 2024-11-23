@@ -47,7 +47,7 @@ def evaluate_model_metrics(y_test, y_pred):
     """
     if y_test.name == 'price_bucket_equiwidth': # classification
         accuracy = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred, average='weighted')
+        precision = precision_score(y_test, y_pred, average='weighted', zero_division=0)
         recall = recall_score(y_test, y_pred, average='weighted')
         f1 = f1_score(y_test, y_pred, average='weighted')
 

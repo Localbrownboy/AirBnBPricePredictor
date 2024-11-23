@@ -133,47 +133,6 @@ def plot_price_bucket_distribution(df, output_image, bucket_column):
     df.drop(columns=['price_bucket_order'], inplace=True, errors='ignore')
 
 
-def plot_top_correlations_heatmap(df, top_n, output_image):
-    """
-    Plots a heatmap of the top N highest correlations in the dataset.
-    
-    Parameters:
-    - df: DataFrame containing the dataset.
-    - top_n: Number of top correlations to include in the heatmap.
-    - output_image: Path to save the heatmap image.
-    """
-    # Calculate correlation matrix
-    correlation_matrix = df.corr()
-
-    # Get the upper triangle of the correlation matrix (to avoid duplicate correlations)
-    upper_triangle = correlation_matrix.where(
-        np.triu(np.ones(correlation_matrix.shape), k=1).astype(bool)
-    )
-
-    # Flatten the matrix and sort by absolute correlation values
-    sorted_corr = (
-        upper_triangle.stack()
-        .abs()
-        .sort_values(ascending=False)
-        .head(top_n)
-    )
-
-    # Extract the features with the highest correlations
-    top_features = sorted_corr.index.get_level_values(0).union(
-        sorted_corr.index.get_level_values(1)
-    )
-
-    # Create a smaller correlation matrix with the top features
-    filtered_corr_matrix = correlation_matrix.loc[top_features, top_features]
-
-    # Plot the heatmap
-    plt.figure(figsize=(12, 8))
-    sns.heatmap(filtered_corr_matrix, annot=True, cmap='coolwarm', fmt=".2f")
-    plt.title(f'Top {top_n} Correlations')
-    plt.tight_layout()
-    plt.savefig(output_image)
-    plt.close()
-
 def plot_highest_correlations_with_price(df, target_column, top_n, output_image):
     """
     Finds and plots the top N features with the highest correlation to a target column.
@@ -193,15 +152,12 @@ def plot_highest_correlations_with_price(df, target_column, top_n, output_image)
     # Get the top correlated features
     top_features = top_correlations.index.tolist()
     
-    # Add the target column to the list of features to include in the heatmap
-    features_to_plot = [target_column] + top_features
-    
     # Create a smaller correlation matrix
-    filtered_corr_matrix = df[features_to_plot].corr()
+    filtered_corr = df.corr().loc[top_features, [target_column]]
     
     # Plot the heatmap
     plt.figure(figsize=(12, 10))
-    sns.heatmap(filtered_corr_matrix, annot=True, cmap='coolwarm', fmt=".2f" , annot_kws={"fontsize": 10})
+    sns.heatmap(filtered_corr, annot=True, cmap='coolwarm', fmt=".2f" , annot_kws={"fontsize": 10})
     plt.title(f'Top {top_n} Features Correlated with {target_column.capitalize()}')
     plt.tight_layout()
     plt.savefig(output_image)
@@ -247,7 +203,6 @@ def main():
 
     # Generate the heatmap
     plot_correlation_heatmap(df, selected_attributes, './visualizations/selected_correlation_heatmap.jpeg')
-    plot_top_correlations_heatmap(df_scaled, top_n=10, output_image='./visualizations/top_correlations_heatmap.jpeg')
     plot_highest_correlations_with_price(
         df=df_scaled,
         target_column='price',
