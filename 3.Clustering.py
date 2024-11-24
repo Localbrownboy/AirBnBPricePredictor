@@ -128,7 +128,7 @@ def main():
     file_path = sys.argv[1]
     # Load the processed data
     df = load_processed_data(file_path)
-    df.drop(columns=['price_bucket_equidepth' , 'price_bucket_equiwidth'], inplace=True)
+    df.drop(columns=['price_bucket_equidepth' , 'price_bucket_equiwidth', 'price'], inplace=True)
 
     kmeans_labels, _ = apply_kmeans_clustering(df, n_clusters=2)
     visualize_clusters(df, kmeans_labels, 'KMeans Clustering', './visualizations/clustering/clustering_kmeans.jpeg')
@@ -139,7 +139,7 @@ def main():
     print(f"Davies-Bouldin Index: {davies:.3f}")
 
 
-    dbscan_labels, _ = apply_dbscan_clustering(df, eps=9.8999, min_samples=7)
+    dbscan_labels, _ = apply_dbscan_clustering(df, eps=9.699999999999998, min_samples=4)
     visualize_clusters(df, dbscan_labels, 'DBSCAN Clustering', './visualizations/clustering/clustering_dbscan.jpeg')
     silhouette, calinski, davies = evaluate_clustering(df, dbscan_labels)
     print("\nApplying DBSCAN:...")

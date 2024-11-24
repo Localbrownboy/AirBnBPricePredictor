@@ -7,6 +7,7 @@ import folium
 from folium.plugins import MarkerCluster
 import sys
 import numpy as np
+from sklearn.decomposition import PCA
 
 # Load data function
 def load_data(file_path):
@@ -164,16 +165,65 @@ def plot_highest_correlations_with_price(df, target_column, top_n, output_image)
     plt.close()
 
 
+def visualize_pca_with_buckets(df, bucket_labels, title, output_image):
+    """
+    Visualizes the PCA scatterplot with 3D points labeled by sorted bucket labels.
+
+    Parameters:
+    - df: DataFrame containing the dataset.
+    - bucket_labels: Labels (e.g., equiwidth or equidepth buckets) for coloring the points.
+    - title: Title for the plot.
+    - output_image: Path to save the 3D PCA scatterplot.
+    """
+    # Drop price-related columns before PCA
+    features = df.drop(columns=['price', 'price_bucket_equiwidth', 'price_bucket_equidepth'], errors='ignore')
+
+    # Dimensionality reduction to 3 components
+    reducer = PCA(n_components=3)
+    reduced_data = reducer.fit_transform(features.select_dtypes(include=[np.number]))
+
+    # Sort bucket labels
+    unique_labels = sorted(np.unique(bucket_labels), key=lambda x: int(x.split('-')[0]))
+    label_to_number = {label: idx for idx, label in enumerate(unique_labels)}
+    numeric_labels = [label_to_number[label] for label in bucket_labels]
+
+    fig = plt.figure(figsize=(10, 8))
+
+    # Create a 3D axis
+    axis = fig.add_subplot(111, projection='3d')
+    axis.set_xlabel('Principal Component 1')
+    axis.set_ylabel('Principal Component 2')
+    axis.set_zlabel('Principal Component 3')
+
+    # Plot data points in 3D space
+    scatter = axis.scatter(
+        reduced_data[:, 0],
+        reduced_data[:, 1],
+        reduced_data[:, 2],
+        c=numeric_labels,
+        cmap='viridis',
+        alpha=0.8
+    )
+
+    # Use colorbar for bucket labels
+    colorbar = plt.colorbar(scatter)
+    colorbar.set_ticks(range(len(unique_labels)))  # Set ticks to match numeric encoding
+    colorbar.set_ticklabels(unique_labels)  # Map ticks back to sorted original labels
+    colorbar.set_label('Bucket Label')
+
+    plt.title(title)
+    plt.savefig(output_image)
+    plt.close()
 
 # Main function to execute all EDA steps
 def main():
     file_path = sys.argv[1]
     file_path_scaled = sys.argv[2]
-
+    file_path_processed = sys.argv[3]
     # Load the dataset
     df = load_data(file_path)
     df_scaled = load_data(file_path_scaled).drop( ['price_bucket_equidepth' , 'price_bucket_equiwidth'] , axis=1) # drop price bucket column 
-
+    df_processed = load_data(file_path_processed)
     # Plot price distribution
     plot_price_distribution(df, './visualizations/eda/price_histogram.html', './visualizations/eda/price_histogram.jpeg', x_axis_limit=2000)
     
@@ -213,6 +263,21 @@ def main():
     plot_price_bucket_distribution(df, './visualizations/eda/price_bucket_equiwidth_distribution.jpeg', bucket_column='price_bucket_equiwidth')
     plot_price_bucket_distribution(df, './visualizations/eda/price_bucket_equidepth_distribution.jpeg', bucket_column='price_bucket_equidepth')
 
+    # PCA scatterplot with equiwidth bucket labels
+    visualize_pca_with_buckets(
+        df=df_processed,
+        bucket_labels=df['price_bucket_equiwidth'],
+        title='PCA Scatterplot with Equiwidth Buckets',
+        output_image='./visualizations/eda/pca_equiwidth_buckets.jpeg'
+    )
+
+    # PCA scatterplot with equidepth bucket labels
+    visualize_pca_with_buckets(
+        df=df_processed,
+        bucket_labels=df['price_bucket_equidepth'],
+        title='PCA Scatterplot with Equidepth Buckets',
+        output_image='./visualizations/eda/pca_equidepth_buckets.jpeg'
+    )
 
     # Plot relationships between price and other features
     for feature in ['accommodates', 'bedrooms', 'neighbourhood_cleansed', 'amenity_count', ]:
