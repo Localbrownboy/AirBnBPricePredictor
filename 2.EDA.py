@@ -225,7 +225,7 @@ def main():
     df_scaled = load_data(file_path_scaled).drop( ['price_bucket_equidepth' , 'price_bucket_equiwidth'] , axis=1) # drop price bucket column 
     df_processed = load_data(file_path_processed)
     # Plot price distribution
-    plot_price_distribution(df, './visualizations/eda/price_histogram.html', './visualizations/eda/price_histogram.jpeg', x_axis_limit=2000)
+    plot_price_distribution(df, './visualizations/eda/price_histogram.html', './visualizations/eda/price_histogram.jpeg', x_axis_limit=500)
     
     # Plot listing count per host
     plot_listing_count_per_host(df, './visualizations/eda/listing_count_per_host.jpeg')
