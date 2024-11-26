@@ -17,3 +17,6 @@ os.system('python3 ./5.FeatureSelection.py ./data/listings_outliers_removed.csv'
 
 print(f"\nYou are in Classification:\n")
 os.system('python3 ./6.Classification.py ./data/listings_mi_selected_features_price_bucket_equiwidth.csv')
+
+print(f"\nYou are in Regression:\n")
+os.system('python3 ./7.Regression.py ./data/listings_outliers_removed.csv')
