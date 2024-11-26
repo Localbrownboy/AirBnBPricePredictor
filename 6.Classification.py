@@ -2,14 +2,12 @@ import sys
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score, GridSearchCV
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay,  mean_squared_error, r2_score, roc_curve, roc_auc_score
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay, roc_curve, roc_auc_score
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import label_binarize
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.svm import SVR
 
 
 def load_data(file_path):
@@ -47,23 +45,16 @@ def evaluate_model_metrics(y_test, y_pred):
     - y_test: test data of target variable
     - y_pred: prediction of target variable by model
     """
-    if y_test.name == 'price_bucket_equiwidth': # classification
-        accuracy = accuracy_score(y_test, y_pred)
-        precision = precision_score(y_test, y_pred, average='weighted', zero_division=0)
-        recall = recall_score(y_test, y_pred, average='weighted')
-        f1 = f1_score(y_test, y_pred, average='weighted')
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred, average='weighted', zero_division=0)
+    recall = recall_score(y_test, y_pred, average='weighted')
+    f1 = f1_score(y_test, y_pred, average='weighted')
 
-        print(f'Accuracy: {accuracy}')
-        print(f'Precision: {precision}')
-        print(f'Recall: {recall}')
-        print(f'f1-score: {f1}\n')
+    print(f'Accuracy: {accuracy}')
+    print(f'Precision: {precision}')
+    print(f'Recall: {recall}')
+    print(f'f1-score: {f1}\n')
 
-    else:                             # regression
-        mse = mean_squared_error(y_test, y_pred)
-        r2 = r2_score(y_test, y_pred)
-
-        print(f'Mean Squared Error: {mse}')
-        print(f'R-squared: {r2}\n')
 
 
 def visualize_model_results(y_test, y_pred, model_name, y_pred_prob=None):
@@ -78,49 +69,35 @@ def visualize_model_results(y_test, y_pred, model_name, y_pred_prob=None):
     - model_name: the name of the model
     - y_pred_prob: predicted probability of each class in target variable (only in categorical)
     """
-    if y_test.name == 'price_bucket_equiwidth': # classification
+    # Confusion Matrix
+    class_labels = sorted(np.unique(y_test), key=lambda x: int(x.split('-')[0]))
 
-        # Confusion Matrix
-        class_labels = sorted(np.unique(y_test), key=lambda x: int(x.split('-')[0]))
+    cm = confusion_matrix(y_test, y_pred, labels=class_labels)
+    disp = ConfusionMatrixDisplay(cm, display_labels=class_labels)
+    disp.plot()
 
-        cm = confusion_matrix(y_test, y_pred, labels=class_labels)
-        disp = ConfusionMatrixDisplay(cm, display_labels=class_labels)
-        disp.plot()
+    plt.title(f'Confusion Matrix of {model_name}')
+    plt.xticks(rotation=30)
+    plt.savefig(f'./visualizations/classification/confusion_matrix_{model_name.lower().replace(" ","_")}.jpeg')
+    plt.close()
 
-        plt.title(f'Confusion Matrix of {model_name}')
-        plt.xticks(rotation=30)
-        plt.savefig(f'./visualizations/classification/confusion_matrix_{model_name.lower().replace(" ","_")}.jpeg')
-        plt.close()
+    # ROC curves
+    classes = np.unique(y_test)  # List of unique classes
+    y_true_binary = label_binarize(y_test, classes=classes)
 
-        # ROC curves
-        classes = np.unique(y_test)  # List of unique classes
-        y_true_binary = label_binarize(y_test, classes=classes)
+    plt.figure()
 
-        plt.figure()
+    for i, class_label in enumerate(classes):
+        # Compute ROC for each class
+        fpr, tpr, _ = roc_curve(y_true_binary[:, i], y_pred_prob[:, i])
+        plt.plot(fpr, tpr, label=f"Class {class_label}")
 
-        for i, class_label in enumerate(classes):
-            # Compute ROC for each class
-            fpr, tpr, _ = roc_curve(y_true_binary[:, i], y_pred_prob[:, i])
-            plt.plot(fpr, tpr, label=f"Class {class_label}")
-
-        plt.xlabel('False Positive Rate (FPR)')
-        plt.ylabel('True Positive Rate (TPR)')
-        plt.title(f'ROC Curve for {model_name}')
-        plt.legend()
-        plt.savefig(f'./visualizations/classification/roc_curves_{model_name.lower().replace(" ","_")}.jpeg')
-        plt.close()
-
-    else:                            # regression
-        residuals = y_test - y_pred
-
-        plt.figure(figsize=(8, 6))
-        plt.scatter(y_pred, residuals, alpha=0.6)
-        plt.axhline(0, color='red', linestyle='--', linewidth=1)
-        plt.title(f'Residual Plot of {model_name}')
-        plt.xlabel('Predicted Values')
-        plt.ylabel('Residuals')
-        plt.savefig(f'./visualizations/classification/residual_plot_{model_name.lower().replace(" ","_")}.jpeg')
-        plt.close()
+    plt.xlabel('False Positive Rate (FPR)')
+    plt.ylabel('True Positive Rate (TPR)')
+    plt.title(f'ROC Curve for {model_name}')
+    plt.legend()
+    plt.savefig(f'./visualizations/classification/roc_curves_{model_name.lower().replace(" ","_")}.jpeg')
+    plt.close()
 
 
 
@@ -183,62 +160,7 @@ def main():
         visualize_model_results(y_test_clf, y_pred_clf, name, y_pred_prob)
 
     # -------------------------------------------------------------------------------------
-    # Regression model
-    regressor = RandomForestRegressor(n_estimators=100, random_state=42)
-    print(f'\nCross Validation Score of Random Forest Regressor is: {cross_validate_model(regressor, X_train_reg, y_train_reg, sk_fold)}')
 
-    regressor.fit(X_train_reg, y_train_reg)
-    y_pred_reg = regressor.predict(X_test_reg)
-
-    # evaluate the model by mean squared error and r2-score
-    evaluate_model_metrics(y_test_reg, y_pred_reg)
-
-    # Plot residuals
-    visualize_model_results(y_test_reg, y_pred_reg, model_name="Random Forest Regressor")
-
-    # -------------------------------------------------------------------------------------
-    # Second Regression Model
-    gbr = GradientBoostingRegressor(
-        n_estimators=100,    # Number of boosting stages
-        learning_rate=0.1,   # Shrinks contribution of each tree
-        max_depth=3,         # Maximum depth of the trees
-        random_state=42
-    )
-
-    # Evaluate using cross-validation
-    print(f'\nCross Validation Score of Gradient Boosting Regressor is: {cross_validate_model(gbr, X_train_reg, y_train_reg, sk_fold)}')
-
-    # Train and predict
-    gbr.fit(X_train_reg, y_train_reg)
-    y_pred_gbr = gbr.predict(X_test_reg)
-
-    # Evaluate the model
-    evaluate_model_metrics(y_test_reg, y_pred_gbr)
-
-    # Plot residuals
-    visualize_model_results(y_test_reg, y_pred_gbr, model_name="Gradient Boosting Regressor")
-
-    # -------------------------------------------------------------------------------------
-    # Third Regression Model
-    svr = SVR(
-        kernel='rbf',         # Use the RBF kernel for non-linear relationships
-        C=1.0,                # Regularization parameter
-        epsilon=0.1           # Margin of tolerance for the loss function
-    )
-
-    # Cross-validation
-    print(f'\nCross Validation Score of SVR is: {cross_validate_model(svr, X_train_reg, y_train_reg, sk_fold)}')
-
-    # Train and predict
-    svr.fit(X_train_reg, y_train_reg)
-    y_pred_svr = svr.predict(X_test_reg)
-
-    # Evaluate and visualize
-    evaluate_model_metrics(y_test_reg, y_pred_svr)
-    visualize_model_results(y_test_reg, y_pred_svr, model_name="Support Vector Regressor")
-    # -------------------------------------------------------------------------------------
-
-    return
 
     # tune hyperparameters for random forest classifier by grid search
     forest_model = RandomForestClassifier(random_state=42)
