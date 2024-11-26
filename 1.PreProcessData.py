@@ -38,17 +38,16 @@ def preprocess_data(df):
     df['host_response_rate'] = df['host_response_rate'].str.replace('%', '').astype(float) / 100
     df['host_acceptance_rate'] = df['host_acceptance_rate'].str.replace('%', '').astype(float) / 100
 
-    # Drop rows where 'price' is empty
-    print(len(df))
+    print(f"Initial number of rows: {len(df)}")
+
     df.dropna(subset=['price'], inplace=True)
-    print(len(df))
+    print(f"After dropping rows with missing 'price': {len(df)}")
 
     df = df[df['price'] < 500]
-    print(len(df))
+    print(f"After dropping rows with 'price' >= $500: {len(df)}")
 
     df = df[df['host_acceptance_rate'] > 0.10]
-    print(len(df))
-
+    print(f"After dropping rows with 'host_acceptance_rate' <= 10%: {len(df)}")
 
     # Save pruned data to CSV
     df.to_csv('./data/intermediate_listings_pruned_columns.csv', index=False)
@@ -83,8 +82,7 @@ def impute_missing_values(df):
     # Save imputed data to CSV
     df.to_csv('./data/intermediate_listings_imputed.csv', index=False)
 
-    print("Number of imputed values per attribute:")
-    print(imputed_counts)
+    print(f"Number of imputed values per attribute: {imputed_counts}")
 
     return df, imputed_counts
 
