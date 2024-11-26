@@ -39,9 +39,16 @@ def preprocess_data(df):
     df['host_acceptance_rate'] = df['host_acceptance_rate'].str.replace('%', '').astype(float) / 100
 
     # Drop rows where 'price' is empty
+    print(len(df))
     df.dropna(subset=['price'], inplace=True)
+    print(len(df))
+
     df = df[df['price'] < 500]
-    df = df[df['host_acceptance_rate'] > 0.8]
+    print(len(df))
+
+    df = df[df['host_acceptance_rate'] > 0.10]
+    print(len(df))
+
 
     # Save pruned data to CSV
     df.to_csv('./data/intermediate_listings_pruned_columns.csv', index=False)
