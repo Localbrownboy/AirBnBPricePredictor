@@ -39,7 +39,6 @@ def evaluate_model_metrics(y_test, y_pred):
     """
     Evalute the model using various metrics.
     For classification: accuracy, precision, recall and f1-score.
-    For regression: mean squared error (MSE) and r2 score.
     
     Parameters:
     - y_test: test data of target variable
@@ -61,7 +60,6 @@ def visualize_model_results(y_test, y_pred, model_name, y_pred_prob=None):
     """
     Visualize the model results.
     For classification: confusion matrix and ROC curve
-    For regression: residuals plot
     
     Parameters:
     - y_test: true values of target variable
@@ -108,7 +106,6 @@ def main():
     # split data to features (X) and target variable (y)
     X = df.drop(['price_bucket_equiwidth', 'price',], axis=1)  # Remove price_bucket (classification target) and price
     y_classification = df['price_bucket_equiwidth']
-    y_regression = df['price']
 
     # split the dataset into training and testing sets
     # Split data for classification
@@ -116,10 +113,6 @@ def main():
         X, y_classification, test_size=0.2, random_state=42
     )
 
-    # Split data for regression
-    X_train_reg, X_test_reg, y_train_reg, y_test_reg = train_test_split(
-        X, y_regression, test_size=0.2, random_state=42
-    )
 
     # initialize stratified k-fold for cross validation
     sk_fold = StratifiedKFold(n_splits=5)
