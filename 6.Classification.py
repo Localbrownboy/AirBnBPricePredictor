@@ -238,7 +238,6 @@ def main():
     visualize_model_results(y_test_reg, y_pred_svr, model_name="Support Vector Regressor")
     # -------------------------------------------------------------------------------------
 
-    return
 
     # tune hyperparameters for random forest classifier by grid search
     forest_model = RandomForestClassifier(random_state=42)
