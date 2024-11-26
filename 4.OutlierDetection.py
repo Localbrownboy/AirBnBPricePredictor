@@ -98,11 +98,11 @@ def main():
 
 
 
-    outliers = local_outlier_factor(df)
-    visualize_outliers(df, outliers, 'Local Outlier Factor', './visualizations/outliers/outliers_lof.jpeg')
-
-    outliers = one_class_svm(df) # these are the outliers we want to drop
+    outliers = one_class_svm(df) 
     visualize_outliers(df, outliers, 'One Class SVM', './visualizations/outliers/outliers_1class_svm.jpeg')
+
+    outliers = local_outlier_factor(df) # these are the outliers we want to drop
+    visualize_outliers(df, outliers, 'Local Outlier Factor', './visualizations/outliers/outliers_lof.jpeg')
 
     # Drop outliers
     df.drop(index=outliers, inplace=True)
