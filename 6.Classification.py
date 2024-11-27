@@ -35,24 +35,27 @@ def cross_validate_model(model, X_train, y_train, cv):
     return mean_score
 
 
-def evaluate_model_metrics(y_test, y_pred):
+def evaluate_model_metrics(y_test, y_pred, y_pred_prob=None):
     """
     Evalute the model using various metrics.
-    For classification: accuracy, precision, recall and f1-score.
+    For classification: accuracy, precision, recall, f1-score, and ROC-AUC.
     
     Parameters:
     - y_test: test data of target variable
     - y_pred: prediction of target variable by model
+    - y_pred_prob: predicted probability of each class in target variable
     """
     accuracy = accuracy_score(y_test, y_pred)
     precision = precision_score(y_test, y_pred, average='weighted', zero_division=0)
     recall = recall_score(y_test, y_pred, average='weighted')
     f1 = f1_score(y_test, y_pred, average='weighted')
+    auc_score = roc_auc_score(y_test, y_pred_prob, average='weighted', multi_class='ovr')
 
     print(f'Accuracy: {accuracy}')
     print(f'Precision: {precision}')
     print(f'Recall: {recall}')
-    print(f'f1-score: {f1}\n')
+    print(f'f1-score: {f1}')
+    print(f'ROC-AUC: {auc_score}\n')
 
 
 
@@ -85,7 +88,7 @@ def visualize_model_results(y_test, y_pred, model_name, y_pred_prob=None):
 
     plt.figure()
 
-    for i, class_label in enumerate(classes):
+    for i, class_label in enumerate(sorted(classes, key=lambda x: int(x.split('-')[0]))):
         # Compute ROC for each class
         fpr, tpr, _ = roc_curve(y_true_binary[:, i], y_pred_prob[:, i])
         plt.plot(fpr, tpr, label=f"Class {class_label}")
@@ -119,13 +122,13 @@ def main():
 
     # initialize classification models
     classifiers = {
-        "Random Forest": RandomForestClassifier(n_estimators=100, min_samples_split=2, min_samples_leaf=5, max_depth=20, bootstrap=False, random_state=42, ),
+        "Random Forest": RandomForestClassifier(n_estimators=100, random_state=42),
         "Neural Network Classifier": MLPClassifier(
             hidden_layer_sizes=(20,20,10),
             max_iter=5000,
             random_state=42,
             # early_stopping=True,       # Enable early stopping
-            validation_fraction=0.2,   # Fraction of training data used for validation (to determine when to stop)
+            # validation_fraction=0.2,   # Fraction of training data used for validation
             n_iter_no_change=10,
             activation='logistic',
             alpha=0.001,
@@ -147,13 +150,14 @@ def main():
         y_pred_prob = model.predict_proba(X_test_clf)
 
         # evaluate the model by accuracy, precision, recall, and f1-score 
-        evaluate_model_metrics(y_test_clf, y_pred_clf)
+        evaluate_model_metrics(y_test_clf, y_pred_clf, y_pred_prob)
 
         # visualize confusion matrix
         visualize_model_results(y_test_clf, y_pred_clf, name, y_pred_prob)
 
     # -------------------------------------------------------------------------------------
 
+    print(f"Performing hyperparameter tuning in Random Forest Classifier:")
 
     # tune hyperparameters for random forest classifier by grid search
     forest_model = RandomForestClassifier(random_state=42)
@@ -174,7 +178,7 @@ def main():
     y_pred_prob = best_rf.predict_proba(X_test_clf)
 
     # evaluate the model by accuracy, precision, recall, and f1-score 
-    evaluate_model_metrics(y_test_clf, y_pred_clf)
+    evaluate_model_metrics(y_test_clf, y_pred_clf, y_pred_prob)
 
     # visualize confusion matrix
     visualize_model_results(y_test_clf, y_pred_clf, 'Tuned Random Forest Classifier', y_pred_prob)
