@@ -74,7 +74,7 @@ def visualize_clusters(df, labels, title, output_image):
 
 
 def tune_kmeans(df):
-    """Tunes K-means clustering"""
+    """Tunes K-means clustering and returns best k"""
     print("\nTuning K-means Clustering...")
     best_silhouette = 0
     best_k = 0
@@ -85,12 +85,10 @@ def tune_kmeans(df):
             best_silhouette = silhouette
             best_k = k
     print(f"Best K for K-means: {best_k}, Best Silhouette Score: {best_silhouette:.3f}")
-    kmeans_labels, _ = apply_kmeans_clustering(df, n_clusters=best_k)
-    visualize_clusters(df, kmeans_labels, 'KMeans Clustering', './visualizations/clustering/clustering_kmeans.jpeg')
-
+    return best_k
 
 def tune_dbscan(df):
-    """Tunes DBSCAN clustering"""
+    """Tunes DBSCAN clustering and returns best eps and min number of samples"""
     print("\nTuning DBSCAN Clustering...")
     best_silhouette = -1
     best_eps = 0
@@ -105,12 +103,11 @@ def tune_dbscan(df):
                     best_eps = eps
                     best_min_samples = min_samples
     print(f"Best parameters for DBSCAN: eps={best_eps}, min_samples={best_min_samples}, Best Silhouette Score: {best_silhouette:.3f}")
-    dbscan_labels, _ = apply_dbscan_clustering(df, eps=best_eps, min_samples=best_min_samples)
-    visualize_clusters(df, dbscan_labels, 'DBSCAN Clustering', './visualizations/clustering/clustering_dbscan.jpeg')
+    return best_eps, best_min_samples
 
 
 def tune_hierarchical(df):
-    """Tunes Hierarchical clustering"""
+    """Tunes Hierarchical clustering and returns best k"""
     print("\nTuning Hierarchical Clustering...")
     best_silhouette = 0
     best_n_clusters = 0
@@ -121,46 +118,52 @@ def tune_hierarchical(df):
             best_silhouette = silhouette
             best_n_clusters = n_clusters
     print(f"Best number of clusters for Hierarchical Clustering: {best_n_clusters}, Best Silhouette Score: {best_silhouette:.3f}")
-    hierarchical_labels, _ = apply_hierarchical_clustering(df, n_clusters=best_n_clusters)
-    visualize_clusters(df, hierarchical_labels, 'Hierarchical Clustering', './visualizations/clustering/clustering_hierarchical.jpeg')
+    return best_n_clusters
 
 def main():
     file_path = sys.argv[1]
     # Load the processed data
     df = load_processed_data(file_path)
-    df.drop(columns=['price_bucket_equidepth' , 'price_bucket_equiwidth', 'price'], inplace=True)
+    df.drop(columns=['price_bucket_equidepth', 'price_bucket_equiwidth', 'price'], inplace=True)
 
-    kmeans_labels, _ = apply_kmeans_clustering(df, n_clusters=2)
-    visualize_clusters(df, kmeans_labels, 'KMeans Clustering', './visualizations/clustering/clustering_kmeans.jpeg')
-    silhouette, calinski, davies  = evaluate_clustering(df, kmeans_labels)
+    # Tune K-means clustering hyperparameters
+    kmeans_best_k = tune_kmeans(df)
+    # Perform K-means clustering with optimal number of clusters
     print("\nApplying Kmeans:...")
+    kmeans_labels, _ = apply_kmeans_clustering(df, n_clusters=kmeans_best_k)
+    # Produce 3D scatterplot
+    visualize_clusters(df, kmeans_labels, 'KMeans Clustering', './visualizations/clustering/clustering_kmeans.jpeg')
+    # Evaluate clustering
+    silhouette, calinski, davies  = evaluate_clustering(df, kmeans_labels)
     print(f"Silhouette Score: {silhouette:.3f}")
     print(f"Calinski-Harabasz Index: {calinski:.3f}")
     print(f"Davies-Bouldin Index: {davies:.3f}")
 
-
-    dbscan_labels, _ = apply_dbscan_clustering(df, eps=9.699999999999998, min_samples=4)
-    visualize_clusters(df, dbscan_labels, 'DBSCAN Clustering', './visualizations/clustering/clustering_dbscan.jpeg')
-    silhouette, calinski, davies = evaluate_clustering(df, dbscan_labels)
+    # Tune DBSCAN clustering hyperparameters
+    best_eps, best_min_samples = tune_dbscan(df)
+    # Perform DBSCAN with optimal eps value and min number of samples
     print("\nApplying DBSCAN:...")
+    dbscan_labels, _ = apply_dbscan_clustering(df, eps=best_eps, min_samples=best_min_samples)
+    # Produce 3D scatterplot
+    visualize_clusters(df, dbscan_labels, 'DBSCAN Clustering', './visualizations/clustering/clustering_dbscan.jpeg')
+    # Evaluate clustering
+    silhouette, calinski, davies = evaluate_clustering(df, dbscan_labels)
     print(f"Silhouette Score: {silhouette:.3f}")
     print(f"Calinski-Harabasz Index: {calinski:.3f}")
     print(f"Davies-Bouldin Index: {davies:.3f}")
 
-
-    hierarchical_labels, _ = apply_hierarchical_clustering(df, n_clusters=2)
-    visualize_clusters(df, hierarchical_labels, 'Hierarchical Clustering', './visualizations/clustering/clustering_hierarchical.jpeg')
-    silhouette, calinski, davies = evaluate_clustering(df, hierarchical_labels)
+    # Tune hierarchical clustering hyperparameters
+    best_n_clusters = tune_hierarchical(df)
+    # Perform hierarchical clustering with optimal number of clusters
     print("\nApplying Hierarchical:...")
+    hierarchical_labels, _ = apply_hierarchical_clustering(df, n_clusters=best_n_clusters)
+    # Produce 3D scatterplot
+    visualize_clusters(df, hierarchical_labels, 'Hierarchical Clustering', './visualizations/clustering/clustering_hierarchical.jpeg')
+    # Evaluate clustering
+    silhouette, calinski, davies = evaluate_clustering(df, hierarchical_labels)
     print(f"Silhouette Score: {silhouette:.3f}")
     print(f"Calinski-Harabasz Index: {calinski:.3f}")
     print(f"Davies-Bouldin Index: {davies:.3f}")
-
-
-    tune_kmeans(df)
-    tune_dbscan(df)
-    tune_hierarchical(df)
-
 
 
 if __name__ == "__main__":
