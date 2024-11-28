@@ -50,6 +50,10 @@ def main():
 
     df = load_data(file_path)
 
+    # Save the 'price' column separately and drop it from the dataframe
+    price_column = df['price']
+    df = df.drop(columns=['price'])
+
     for target_var in target_vars:
         # Create a copy of the dataframe and drop the other target variable
         temp_df = df.copy().drop(columns=[var for var in target_vars if var != target_var])
@@ -67,16 +71,20 @@ def main():
         # Restore original target variable labels
         temp_df[target_var] = label_encoding.inverse_transform(temp_df[target_var])
 
+        # Add back the 'price' column to the dataframes before saving
+        temp_df['price'] = price_column
+
         # Save dataframe with selected features to CSV files
-        df_mi_selected_features = temp_df[mi_selected_features + [target_var]]
+        df_mi_selected_features = temp_df[mi_selected_features + [target_var, 'price']]
         mi_output_file = f'./data/listings_mi_selected_features_{target_var}.csv'
         df_mi_selected_features.to_csv(mi_output_file, index=False)
         print(f"Saved Mutual Information selected features to {mi_output_file}")
 
-        df_rfe_selected_features = temp_df[rfe_selected_features + [target_var]]
+        df_rfe_selected_features = temp_df[rfe_selected_features + [target_var, 'price']]
         rfe_output_file = f'./data/listings_rfe_selected_features_{target_var}.csv'
         df_rfe_selected_features.to_csv(rfe_output_file, index=False)
         print(f"Saved RFE selected features to {rfe_output_file}")
+
 
 if __name__ == "__main__":
     main()
