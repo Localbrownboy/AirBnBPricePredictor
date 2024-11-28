@@ -3,6 +3,7 @@ from sklearn.feature_selection import RFE, mutual_info_classif
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import LabelEncoder
 import sys
+import matplotlib.pyplot as plt
 
 def load_data(file_path: str) -> pd.DataFrame:
     """Loads the dataset from the given file path."""
@@ -15,7 +16,7 @@ def encode_target_variable(df: pd.DataFrame, target_col: str):
     df[target_col] = le.fit_transform(df[target_col])
     return df, le
 
-def select_features_rfe(df: pd.DataFrame, target_col: str, num_features: int = 20):
+def select_features_rfe(df: pd.DataFrame, target_col: str, filepath, num_features: int = 20):
     """Select num_features features using Recursive Feature Elimination with a Decision Tree classifier"""
     X = df.drop(columns=[target_col])
     y = df[target_col]
@@ -27,9 +28,35 @@ def select_features_rfe(df: pd.DataFrame, target_col: str, num_features: int = 2
     selected_features = X.columns[rfe.support_].tolist()
     print("\nSelected Features using RFE:", selected_features)
 
+    model.fit(X, y)
+    feature_importances = model.feature_importances_
+
+    # Create a DataFrame with feature names and their importances
+    importance_df = pd.DataFrame({
+        'Feature': X.columns,
+        'Importance': feature_importances
+    })
+
+    # Sort by importance to get top features
+    importance_df = importance_df.sort_values(by='Importance', ascending=False)
+    top_df = importance_df.head(num_features).sort_values(by='Importance', ascending=True)
+
+    bucket_type = target_col.split('_')[-1]
+
+    plt.figure(figsize=(10, 6))
+    # Plot the feature importances as a bar chart
+    top_df.plot(kind='barh', x='Feature', y='Importance', color='skyblue', edgecolor='black')
+    plt.title(f"Top {num_features} Feature Importances (RFE) with {bucket_type}", fontsize=10)
+    plt.xlabel("Importance", fontsize=12)
+    plt.ylabel("Features", fontsize=12)
+    plt.grid(axis='x', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.savefig(filepath)
+    plt.close()
+
     return selected_features
 
-def select_features_mi(df: pd.DataFrame, target_col: str, num_features: int = 20):
+def select_features_mi(df: pd.DataFrame, target_col: str, filepath, num_features: int = 20):
     """Select num_features features using Mutual Information scores"""
     X = df.drop(columns=[target_col])
     y = df[target_col]
@@ -39,10 +66,24 @@ def select_features_mi(df: pd.DataFrame, target_col: str, num_features: int = 20
     mi_scores = pd.Series(mi_scores, index=X.columns)
 
     # Select the top features based on the scores
-    selected_features = mi_scores.nlargest(num_features).index.tolist()
-    print("Selected Features using Mutual Information:", selected_features)
+    selected_features = mi_scores.nlargest(num_features)
+    print("Selected Features using Mutual Information:", selected_features.index.tolist())
 
-    return selected_features
+    # bar chart in feature importance
+    bucket_type = target_col.split('_')[-1]
+
+    plt.figure(figsize=(10, 6))
+    selected_features.sort_values().plot(kind='barh', color='skyblue', edgecolor='black')
+    plt.title(f"Top {num_features} Feature Importances (Mutual Information) with {bucket_type}", fontsize=10)
+    plt.xlabel("Mutual Information Score", fontsize=12)
+    plt.ylabel("Features", fontsize=12)
+    plt.grid(axis='x', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.savefig(filepath)
+    plt.close()
+
+    return selected_features.index.tolist()
+
 def main():
     file_path = sys.argv[1]
     target_vars = ['price_bucket_equiwidth', 'price_bucket_equidepth']
@@ -63,10 +104,10 @@ def main():
         temp_df, label_encoding = encode_target_variable(temp_df, target_var)
 
         # Perform feature selection using Mutual Information
-        mi_selected_features = select_features_mi(temp_df, target_var, num_features)
+        mi_selected_features = select_features_mi(temp_df, target_var, f'./visualizations/features/features_mi_selected_{target_var}.jpeg', num_features)
 
         # Perform feature selection using RFE
-        rfe_selected_features = select_features_rfe(temp_df, target_var, num_features)
+        rfe_selected_features = select_features_rfe(temp_df, target_var, f'./visualizations/features/features_rfe_selected_{target_var}.jpeg', num_features)
 
         # Restore original target variable labels
         temp_df[target_var] = label_encoding.inverse_transform(temp_df[target_var])
