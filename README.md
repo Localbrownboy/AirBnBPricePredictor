@@ -295,15 +295,15 @@ The objective of this task is to identify and address outliers in the dataset to
 
 #### Local Outlier Factor (LOF)
 
-![outliers_lof](visualizations/outliers_lof.jpeg)
+![outliers_lof](visualizations/outliers/outliers_lof.jpeg)
 
 #### One-Class SVM
 
-![outliers_1class_svm](visualizations/outliers_1class_svm.jpeg)
+![outliers_1class_svm](visualizations/outliers/outliers_1class_svm.jpeg)
 
 #### Isolation Forest
 
-![outliers_isolation_forest](visualizations/outliers_isolation_forest.jpeg)
+![outliers_isolation_forest](visualizations/outliers/outliers_isolation_forest.jpeg)
 
 > Isolation Forest seems to separate outliers well from the normal data points compared to the other two anomaly detection algorithms. Therefore, we will proceed with removing the outliers identified by this method.
 
