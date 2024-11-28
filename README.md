@@ -229,7 +229,7 @@ The best parameters are values that results in the highest Silhouette Score.
 We performed each clustering algorithm again with optimal parameters that were obtained in the previous step. The quality of clustering resulting from each algorithm was evaluated using **Silhouette Score**, **Calinski-Harabasz Index**, and **Davies-Bouldin Index**. 
 
 #### K-Means
-![clustering_kmeans](https://hackmd.io/_uploads/H14ZXQHXyl.jpg)
+![clustering_kmeans](./visualizations/clustering/clustering_kmeans.jpeg)
 - **Optimal Number of Clusters**: 2  
 - **Metrics**:
   - Silhouette Score: `0.239`
@@ -237,7 +237,7 @@ We performed each clustering algorithm again with optimal parameters that were o
   - Davies-Bouldin Index: `2.739`
 
 #### DBSCAN
-![clustering_dbscan](https://hackmd.io/_uploads/SyTZQ7B7Jx.jpg)
+![clustering_dbscan](./visualizations/clustering/clustering_dbscan.jpeg)
 
 - **Optimal Parameters**:
   - `eps`: `9.9`  
@@ -248,7 +248,7 @@ We performed each clustering algorithm again with optimal parameters that were o
   - Davies-Bouldin Index: `1.221`
  
 #### Hierarchical Clustering
-![clustering_hierarchical](https://hackmd.io/_uploads/BkcZXQHmJl.jpg)
+![clustering_hierarchical](./visualizations/clustering/clustering_hierarchical.jpeg)
 - **Optimal Number of Clusters**: 2  
 - **Metrics**:
   - Silhouette Score: `0.469`
