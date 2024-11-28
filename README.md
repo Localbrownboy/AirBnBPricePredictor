@@ -244,7 +244,7 @@ We performed each clustering algorithm again with optimal parameters that were o
 
 #### K-Means
 
-![clustering_kmeans](https://hackmd.io/_uploads/H14ZXQHXyl.jpg)
+![clustering_kmeans](./visualizations/clustering/clustering_kmeans.jpeg)
 
 - **Optimal Number of Clusters**: 2
 - **Metrics**:
@@ -254,7 +254,7 @@ We performed each clustering algorithm again with optimal parameters that were o
 
 #### DBSCAN
 
-![clustering_dbscan](https://hackmd.io/_uploads/SyTZQ7B7Jx.jpg)
+![clustering_dbscan](./visualizations/clustering/clustering_dbscan.jpeg)
 
 - **Optimal Parameters**:
   - `eps`: `9.9`
@@ -266,7 +266,7 @@ We performed each clustering algorithm again with optimal parameters that were o
 
 #### Hierarchical Clustering
 
-![clustering_hierarchical](https://hackmd.io/_uploads/BkcZXQHmJl.jpg)
+![clustering_hierarchical](./visualizations/clustering/clustering_hierarchical.jpeg)
 
 - **Optimal Number of Clusters**: 2
 - **Metrics**:
@@ -315,15 +315,15 @@ The objective of this task is to identify and address outliers in the dataset to
 
 #### Local Outlier Factor (LOF)
 
-![outliers_lof](https://hackmd.io/_uploads/SJB7-MB7Jl.jpg)
+![outliers_lof](visualizations/outliers/outliers_lof.jpeg)
 
 #### One-Class SVM
 
-![outliers_1class_svm](https://hackmd.io/_uploads/SkefZGS7Jx.jpg)
+![outliers_1class_svm](visualizations/outliers/outliers_1class_svm.jpeg)
 
 #### Isolation Forest
 
-![outliers_isolation_forest](https://hackmd.io/_uploads/Hyll-MHQ1x.jpg)
+![outliers_isolation_forest](visualizations/outliers/outliers_isolation_forest.jpeg)
 
 > Isolation Forest seems to separate outliers well from the normal data points compared to the other two anomaly detection algorithms. Therefore, we will proceed with removing the outliers identified by this method.
 
@@ -439,27 +439,18 @@ We will use **confusion matrices** and **ROC curves** to visualize the performan
 
 #### Random Forest Classifier
 
-<p align="middle">
-<img src="https://hackmd.io/_uploads/Sy39lFH7Jx.jpg" width="260"/>
-
-<img src="https://hackmd.io/_uploads/ryxJnxFrmyx.jpg" width="260"/>
-</p>
+![](visualizations/classification/confusion_matrix_random_forest.jpeg)
+![](visualizations/classification/roc_curves_random_forest.jpeg)
 
 #### Neural Network Classifier
 
-<p align="middle">
-<img src="https://hackmd.io/_uploads/rJP6eKrXJg.jpg" width="260"/>
-
-<img src="https://hackmd.io/_uploads/HJ5y-tH7ke.jpg" width="260"/>
-</p>
+![](visualizations/classification/confusion_matrix_neural_network_classifier.jpeg)
+![](visualizations/classification/roc_curves_neural_network_classifier.jpeg)
 
 #### k-Nearest Neighbors Classifier
 
-<p align="middle">
-<img src="https://hackmd.io/_uploads/rkqGbYS71x.jpg" width="260"/>
-
-<img src="https://hackmd.io/_uploads/HJ3lWYHQke.jpg" width="260"/>
-</p>
+![](visualizations/classification/confusion_matrix_knn.jpeg)
+![](visualizations/classification/roc_curves_knn.jpeg)
 
 Based on the confusion matrices, we can tell that the models perform fairly well in predicting certain price buckets (e.g., 70-120, 120-170), where most of the instances are correctly classified.
 
@@ -506,17 +497,17 @@ R-squared is known as the coefficient of determination, it explains the proporti
 #### Random Forest Regressor
 
 **Cross-validated R-squared score:** 0.65
-**Residual Plot**: ![residual_plot_random_forest_regressor](https://hackmd.io/_uploads/SyvjrCQXJg.jpg)
+**Residual Plot**: ![residual_plot_random_forest_regressor](./visualizations/regression/residual_plot_random_forest_regressor.jpeg)
 
 #### Gradient Boosting Regressor
 
 **Cross-validated R-squared score:** 0.64
-**Residual Plot**: ![residual_plot_gradient_boosting_regressor](https://hackmd.io/_uploads/SJinPAQmkg.jpg)
+**Residual Plot**: ![residual_plot_gradient_boosting_regressor](visualizations/regression/residual_plot_gradient_boosting_regressor.jpeg)
 
 #### Support Vector Regressor
 
 **Cross-validated R-squared score:** 0.41
-**Residual Plot**: ![residual_plot_support_vector_regressor](https://hackmd.io/_uploads/Skb6D0mXJx.jpg)
+**Residual Plot**: ![residual_plot_support_vector_regressor](visualizations/regression/residual_plot_support_vector_regressor.jpeg)
 
 #### Analysis of Regression
 
@@ -554,5 +545,5 @@ This limitation affects the reliability of the dataset, as we cannot distinguish
 
   - We could change the task to be predicting a transformed version of the target variable. One such transformation that would resolve this right-skew would be a log or a square-root.
 
-- **Feature Transformation**: Much of our data turned out to be skewed in some way, this likely was the source of our issues in clustering..
+- **Feature Transformation**: Much of our data turned out to be skewed in some way, this likely was the source of our issues in clustering.
   - In a similar vein to above, we would need to experiment with transformations on these feature values to create a more normalized graph.
