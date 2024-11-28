@@ -295,15 +295,15 @@ The objective of this task is to identify and address outliers in the dataset to
 
 #### Local Outlier Factor (LOF)
 
-![outliers_lof](https://hackmd.io/_uploads/SJB7-MB7Jl.jpg)
+![outliers_lof](visualizations/outliers_lof.jpeg)
 
 #### One-Class SVM
 
-![outliers_1class_svm](https://hackmd.io/_uploads/SkefZGS7Jx.jpg)
+![outliers_1class_svm](visualizations/outliers_1class_svm.jpeg)
 
 #### Isolation Forest
 
-![outliers_isolation_forest](https://hackmd.io/_uploads/Hyll-MHQ1x.jpg)
+![outliers_isolation_forest](visualizations/outliers_isolation_forest.jpeg)
 
 > Isolation Forest seems to separate outliers well from the normal data points compared to the other two anomaly detection algorithms. Therefore, we will proceed with removing the outliers identified by this method.
 
@@ -416,27 +416,18 @@ We will use **confusion matrices** and **ROC curves** to visualize the performan
 
 #### Random Forest Classifier
 
-<p align="middle">
-<img src="https://hackmd.io/_uploads/Sy39lFH7Jx.jpg" width="260"/>
-
-<img src="https://hackmd.io/_uploads/ryxJnxFrmyx.jpg" width="260"/>
-</p>
+![](visualizations/classification/confusion_matrix_random_forest.jpeg)
+![](visualizations/classification/roc_curves_random_forest.jpeg)
 
 #### Neural Network Classifier
 
-<p align="middle">
-<img src="https://hackmd.io/_uploads/rJP6eKrXJg.jpg" width="260"/>
-
-<img src="https://hackmd.io/_uploads/HJ5y-tH7ke.jpg" width="260"/>
-</p>
+![](visualizations/classification/confusion_matrix_neural_network_classifier.jpeg)
+![](visualizations/classification/roc_curves_neural_network_classifier.jpeg)
 
 #### k-Nearest Neighbors Classifier
 
-<p align="middle">
-<img src="https://hackmd.io/_uploads/rkqGbYS71x.jpg" width="260"/>
-
-<img src="https://hackmd.io/_uploads/HJ3lWYHQke.jpg" width="260"/>
-</p>
+![](visualizations/classification/confusion_matrix_knn.jpeg)
+![](visualizations/classification/roc_curves_knn.jpeg)
 
 Based on the confusion matrices, we can tell that the models perform fairly well in predicting certain price buckets (e.g., 70-120, 120-170), where most of the instances are correctly classified.
 
