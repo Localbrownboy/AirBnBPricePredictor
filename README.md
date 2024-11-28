@@ -2,10 +2,11 @@
 
 ## Motivation
 
-The goal of this project is to create a model for predicting nightly prices of Airbnb listings in Vancouver. Accurate price prediction can provide valuable insights for both hosts looking to optimize their listings and guests seeking cost-effective options.
+Some of us have experience booking short-term accommodations through Airbnb in Vancouver, whether for personal events or when friends/family visit. We also know individuals who host on Airbnb. However, with the vast number of listings, varying features, and diverse locations, it can be challenging to navigate and assess whether a particular accommodation is priced reasonably for its desired features. For Airbnb hosts, determining the ideal price range for their listings to remain competitive can be equally difficult.
 
-The dataset consists of web-scraped information about Airbnb listings in Vancouver, such as property type, location, amenities, host details, and review statistics. By preprocessing and analyzing this data, we aim to identify the most significant factors affecting price and develop an accurate predictive model.
+The goal of this project is to create a model for predicting the nightly prices of Airbnb listings in Vancouver. Accurate price predictions can offer valuable insights for both hosts and guests. Guests can use price predictions to determine if a listing is unusually expensive or a great deal based on its features. Hosts, on the other hand, can leverage price predictions to guide their pricing decisions, ensuring their listing remains competitive by aligning with similar accommodations in Vancouver, maximizing both visibility and bookings.
 
+This dataset is scraped by [Inside Airbnb](https://insideairbnb.com/) at the start of September this year, which contains 6211 entries and 75 columns. It consists of web-scraped information about Airbnb listings in Vancouver, such as property type, location, amenities, host details, and review statistics. By preprocessing and analyzing this data, **we aim to identify the most significant factors affecting price per night and develop an accurate predictive model.**
 ## Installation
 
 1. Clone the repository.
@@ -510,13 +511,34 @@ R-squared is known as the coefficient of determination, it explains the proporti
 **Residual Plot**: ![residual_plot_support_vector_regressor](visualizations/regression/residual_plot_support_vector_regressor.jpeg)
 
 #### Analysis of Regression
+The Random Forest Regressor and Gradient Boosting Regressor performed roughly equally in respect to R-squared scores. They had scores of of 0.65 and 0.64, indicating moderate predictive power. Examining the residuals of these garners similar results with very similar scatterplots being generated. 
 
 These R-squared scores are generally around 0.6 which indicate that our feature set does a moderate job in predicting the prices; however, there is a large proportion of it that we are not capturing. This gives us motivation to explore feature engineering or perhaps augment this dataset with more information from each listing.
 
+
 ## Model Insights/Conclusion
 
-The Random Forest Regressor and Gradient Boosting Regressor performed roughly equally in respect to R-squared scores. They had scores of of 0.65 and 0.64, indicating moderate predictive power. Examining the residuals of these garners similar results with very similar scatterplots being generated.
 
+### Price Distribution
+
+- **Right-Skewed Prices:** The majority of Airbnb listings are priced between $50 and $500 per night, showing a right-skewed distribution.
+- **Latitude Correlation:** Latitude exhibits a stronger correlation with listing prices than longitude. This was further explained in the EDA section.
+
+### Model Applicability
+
+- **Price Buckets:** Using equiwidth bins may result in buckets that are too broad for meaningful analysis. Equidepth bins, while evenly distributing data points, decrease accuracy by 10% and cause misclassifications across multiple buckets.
+- **Performance in Dense Price Ranges:** The model achieves higher accuracy within the $70–$270 price range due to the abundance of data. Its performance diminishes for higher-priced listings where data is sparse.
+- **Practical Use:**
+    - **For Users:** The model can estimate listing prices within a $50 range with approximately 45% accuracy.
+    - **For Hosts:** Hosts can receive pricing suggestions within a $50 margin with 45% confidence. 
+    - **Based on the confusion matrix, predictions within a $100 range have about 90% accuracy for both users and hosts.**
+
+### Lessons Learned
+
+
+- **Data Cleaning:** Extensive cleaning and preprocessing are required when working with real world data. This was the most labor-intensive but necessary step.
+- **Feature Relevance:** The effectiveness of the classification model heavily depends on selecting features that align closely with the class labels. This is exacerbated when feature clustering also doesn't correspond to class labels
+- **Appropriate Modeling:** We should not force a regression task into a classification framework by using buckets to classify continuous data.
 ## Challenges
 
 The majority of our challenges were due to the dataset chosen. We had alot of difficulty trying to find a clustering algorithm
