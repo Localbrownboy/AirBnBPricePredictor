@@ -368,6 +368,11 @@ The 20 most important features selected by Mutual Information (based on highest 
 | `reviews_per_month`                               | `calculated_host_listings_count_entire_homes`       |
 | `host_neighbourhood_central_vancouver`            | `reviews_per_month`        |
 | `neighbourhood_cleansed_downtown`                 | `amenity_count`            |
+
+![features_mi_selected_price_bucket_equiwidth](visualizations/features/features_mi_selected_price_bucket_equiwidth)
+
+![features_rfe_selected_price_bucket_equiwidth](visualizations/features/features_rfe_selected_price_bucket_equiwidth)
+
 ### Analysis
 
 #### Mutual Information Feature Selection Results
